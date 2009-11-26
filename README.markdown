@@ -26,7 +26,7 @@ Copy your combined `wyzihat.js` into `Resources/WKTextView`.
 	[textView setAutoresizingMask:CPViewWidthSizable | CPViewHeightSizable];    
 	[textView setDelegate:self];
 
-The view needs to load resources such as `editor.html` and `wyzihat.js`. Wait for the `richTextEditorDidLoad:` delegate call before using.
+The view needs to load resources such as `editor.html` and `wyzihat.js`. Wait for the `textViewDidLoad:` delegate call before using.
 
 ## License
 

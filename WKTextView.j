@@ -31,15 +31,16 @@
 
 - (void)_finishedLoading
 {
-    [super _finishedLoading];   
+    [super _finishedLoading];
+    
     // FIXME Polling to check if the editor has loaded is inefficient. Unfortunately, _finishedLoading seems to fire
     // too early.
-     
     [self checkLoad];
 }
 
 - (void)checkLoad
 {
+    // Is the editor ready?
     var maybeEditor = [self objectByEvaluatingJavaScriptFromString:"editor"];
     if (maybeEditor)
     {
@@ -50,9 +51,9 @@
             loadTimer = nil;            
          }
         
-        if ([delegate respondsToSelector:@selector(richTextEditorDidLoad:)])
+        if ([delegate respondsToSelector:@selector(textViewDidLoad:)])
         {
-            [delegate richTextEditorDidLoad:self];
+            [delegate textViewDidLoad:self];
         }
     }
     else
