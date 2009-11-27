@@ -104,7 +104,6 @@
 
 - (void)_updateScrollers
 {
-    console.log([_frameView frame]);
     // None of this works.
     /*[_scrollView setHasVerticalScroller:NO];
     [_scrollView setHasVerticalScroller:YES];
@@ -119,10 +118,11 @@
     scroller = [_scrollView horizontalScroller];
     
     [scroller setNeedsDisplay:YES];
-    [scroller setNeedsLayout];
+    [scroller setNeedsLayout];*/
 
-    [self setNeedsDisplay:YES];
-    [[self superview] setNeedsLayout];*/
+    [_scrollView setNeedsDisplay:YES];
+    [_scrollView setNeedsLayout];
+    //[[self superview] setNeedsLayout];
     //[_scrollView setDocumentView:_frameView];
 }
  
@@ -175,7 +175,7 @@
 {
     [self editor].setContent(content);
     [self editor].reload();
-    [self _resizeWebFrame];
+    [self _didChange];    
 }
 
 - (@action)clearText:(id)sender
