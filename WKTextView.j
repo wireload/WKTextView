@@ -68,6 +68,9 @@
     editor.observe("wysihat:change", function() {
         [self _didChange];
     });
+    editor.observe("wysihat:cursormove", function() {
+        [self _cursorDidMove];
+    });
 }
 
 - (JSObject)editor
@@ -78,7 +81,22 @@
 - (void)_didChange
 {
     // When the text changes, the height of the content may change.
+    oldHeight = _iframe.getAttribute("height");
     [self _resizeWebFrame];
+    newHeight = _iframe.getAttribute("height");
+    scrollAmount = newHeight - oldHeight;
+    
+    
+    console.log("oldHeight: "+oldHeight+" newHeight: "+newHeight);
+}
+
+- (void)_cursorDidMove
+{
+    n = editor.selection.getNode();
+    
+    // If the cursor goes outside of the scrollview, try to center it.
+    if (n)
+        [_frameView scrollRectToVisible:CGRectMake(n.offsetLeft,n.offsetTop,n.scrollWidth,n.scrollHeight)];
 }
  
 - (BOOL)_resizeWebFrame
@@ -97,18 +115,25 @@
     if (hscroller)
         height -= [hscroller bounds].size.height;
 
-    // This needs to be before the height calculation.
+    // This needs to be before the height calculation so that the right height for the current
+    // width can be calculated.
     _iframe.setAttribute("width", width);
     
     if (_scrollMode == CPWebViewScrollAppKit && editor !== nil)
     {
-        // ... until we have an editor to match.
-        height = editor.getDocument().body.scrollHeight;         
+        var editorBody = editor.getDocument().body;
+        
+        // editoryBody.scrollHeight is normally correct, except it never becomes smaller even
+        // if the content does. Since in _resizeWebFrame we don't know if the content became
+        // taller or shorter, we have to do it the hard way.
+        height = 0;
+        var children = editorBody.childNodes;
+        for(i=0; i<children.length; i++)
+            height += children[i].scrollHeight;
     }
 
+    console.log("height: "+height);
     _iframe.setAttribute("height", height);
-
-    console.log("width: "+width+" height: "+height);
 
     [_frameView setFrameSize:CGSizeMake(width, height)];
 } 
