@@ -174,11 +174,26 @@
 - (void)setHtmlValue:(CPString)content
 {
     [self editor].setContent(content);
-    [self editor].save();
+    [self editor].reload();
     [self _resizeWebFrame];
+}
+
+- (@action)clearText:(id)sender
+{
+    [self setHtmlValue:""];
 }
  
 - (@action)boldSelection:(id)sender
 {
     [self editor].boldSelection();
+}
+
+- (@action)underlineSelection:(id)sender
+{
+    [self editor].underlineSelection();
+}
+
+- (@action)italicSelection:(id)sender
+{
+    [self editor].italicSelection();
 }
