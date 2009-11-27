@@ -30,7 +30,7 @@ The view needs to load resources such as `editor.html` and `wyzihat.js`. Wait fo
 
 ## Sample
 
-A sample program is provided in the `sample` folder. To use, install `Frameworks` and `wyzihat.js`.
+A sample program is provided in the `sample` folder. You can [view it online](http://hosting.wireload.net/wyzihat/) or compile it yourself. To compile, install `Frameworks` and `wyzihat.js`:
 	
 	cd sample
 	capp gen -f -l --force # Installs Cappuccino frameworks.
@@ -43,7 +43,7 @@ Then open up `index-debug.html` in a browser.
 
 # License
 
-WysihatKit is released under the MIT license.
+WysihatKit is released under the MIT license. The sample incorporates public domain icons from the [Tango Icon Library](http://tango.freedesktop.org/Tango_Icon_Library). 
 
 # Authors
 
