@@ -1,0 +1,38 @@
+/*
+ * Jakefile
+ * sample
+ *
+ * Created by Alexander Ljungberg on November 26, 2009.
+ * Copyright 2009, WireLoad, LLC All rights reserved.
+ */
+
+var ENV = require("system").env,
+    FILE = require("file"),
+    task = require("jake").task,
+    FileList = require("jake").FileList,
+    app = require("cappuccino/jake").app,
+    configuration = ENV["CONFIG"] || ENV["CONFIGURATION"] || ENV["c"] || "Debug";
+
+app ("sample", function(task)
+{
+    task.setBuildIntermediatesPath(FILE.join("Build", "sample.build", configuration));
+    task.setBuildPath(FILE.join("Build", configuration));
+
+    task.setProductName("sample");
+    task.setIdentifier("com.yourcompany.sample");
+    task.setVersion("1.0");
+    task.setAuthor("WireLoad, LLC");
+    task.setEmail("feedback @nospam@ yourcompany.com");
+    task.setSummary("sample");
+    task.setSources(new FileList("**/*.j"));
+    task.setResources(new FileList("Resources/*"));
+    task.setIndexFilePath("index.html");
+    task.setInfoPlistPath("Info.plist");
+
+    if (configuration === "Debug")
+        task.setCompilerFlags("-DDEBUG -g");
+    else
+        task.setCompilerFlags("-O");
+});
+
+task ("default", ["sample"]);
