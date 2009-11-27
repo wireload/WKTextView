@@ -28,9 +28,22 @@ Copy your combined `wyzihat.js` into `Resources/WKTextView`.
 
 The view needs to load resources such as `editor.html` and `wyzihat.js`. Wait for the `textViewDidLoad:` delegate call before using.
 
-## License
+## Sample
 
-WysiHat is released under the MIT license.
+A sample program is provided in the `sample` folder. To use, install `Frameworks` and `wyzihat.js`.
+	
+	cd sample
+	capp gen -f -l --force # Installs Cappuccino frameworks.
+	cd Frameworks
+	ln -s ../../ WyzihatKit
+	cd ..
+	cp <WYZIHAT_BUILD>/wyzihat.js Resources/WKTextView
+
+Then open up `index-debug.html` in a browser.
+
+# License
+
+WysihatKit is released under the MIT license.
 
 # Authors
 
