@@ -85,18 +85,45 @@
     [self _resizeWebFrame];
     newHeight = _iframe.getAttribute("height");
     scrollAmount = newHeight - oldHeight;
-    
-    
+
     console.log("oldHeight: "+oldHeight+" newHeight: "+newHeight);
+    [self _updateScrollers];
 }
 
 - (void)_cursorDidMove
 {
-    n = editor.selection.getNode();
+    
+/*    n = editor.selection.getNode();
     
     // If the cursor goes outside of the scrollview, try to center it.
-    if (n)
+    if (n) {
         [_frameView scrollRectToVisible:CGRectMake(n.offsetLeft,n.offsetTop,n.scrollWidth,n.scrollHeight)];
+        [self _updateScrollers];
+    }*/
+}
+
+- (void)_updateScrollers
+{
+    console.log([_frameView frame]);
+    // None of this works.
+    /*[_scrollView setHasVerticalScroller:NO];
+    [_scrollView setHasVerticalScroller:YES];
+    
+    [_scrollView reflectScrolledClipView:[_scrollView contentView]];
+    
+    var scroller = [_scrollView verticalScroller];
+    
+    [scroller setNeedsDisplay:YES];
+    [scroller setNeedsLayout];
+        
+    scroller = [_scrollView horizontalScroller];
+    
+    [scroller setNeedsDisplay:YES];
+    [scroller setNeedsLayout];
+
+    [self setNeedsDisplay:YES];
+    [[self superview] setNeedsLayout];*/
+    //[_scrollView setDocumentView:_frameView];
 }
  
 - (BOOL)_resizeWebFrame
@@ -122,6 +149,7 @@
     if (_scrollMode == CPWebViewScrollAppKit && editor !== nil)
     {
         var editorBody = editor.getDocument().body;
+
         
         // editoryBody.scrollHeight is normally correct, except it never becomes smaller even
         // if the content does. Since in _resizeWebFrame we don't know if the content became
