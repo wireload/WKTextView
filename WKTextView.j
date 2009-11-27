@@ -66,10 +66,10 @@
     // Without this line Safari may show an inner scrollbar.
     editor.getDocument().body.style.overflow = 'hidden';
     editor.observe("wysihat:change", function() {
-        [self _didChange];
+        [[CPRunLoop mainRunLoop] performSelector:"_didChange" target:self argument:nil order:0 modes:[CPDefaultRunLoopMode]];
     });
     editor.observe("wysihat:cursormove", function() {
-        [self _cursorDidMove];
+        [[CPRunLoop mainRunLoop] performSelector:"_cursorDidMove" target:self argument:nil order:0 modes:[CPDefaultRunLoopMode]];
     });
 }
 
