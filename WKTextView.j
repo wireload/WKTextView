@@ -22,13 +22,26 @@
 {
     if (self = [super initWithFrame:aFrame])
     {
-        [self setMainFrameURL:[[CPBundle mainBundle] pathForResource:"WKTextView/editor.html"]];
         [self setScrollMode:CPWebViewScrollAppKit];
+        [self setMainFrameURL:[[CPBundle mainBundle] pathForResource:"WKTextView/editor.html"]];
         // Check if the document was loaded immediately. This could happen if we're loaded from
         // a file URL.
         [self checkLoad];
     }
     return self;
+}
+
+- (void)_startedLoading
+{
+    // If the frame reloads for whatever reason, the editor is gone.
+    editor = nil;
+    [super _startedLoading];
+}
+
+- (void)_finishedLoading
+{
+    [super _finishedLoading];
+    [self checkLoad];
 }
 
 - (void)checkLoad
@@ -169,14 +182,29 @@
 
     [_frameView setFrameSize:CGSizeMake(width, height)];
 } 
- 
+
+- (void)_loadMainFrameURL
+{
+    // Exactly like super, minus
+    // [self _setScrollMode:CPWebViewScrollNative];
+    [self _startedLoading];
+    
+    _ignoreLoadStart = YES;
+    _ignoreLoadEnd = NO;
+    
+    _url = _mainFrameURL;
+    _html = null;
+    
+    [self _load];
+}
+
 - (CPString)htmlValue
 {
     return [self editor].content();
 }
  
 - (void)setHtmlValue:(CPString)content
-{
+{   
     [self editor].setContent(content);
     [self editor].reload();
     [self _didChange];    
