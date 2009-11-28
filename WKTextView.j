@@ -61,8 +61,12 @@
     if (editor === anEditor)
         return;
     editor = anEditor;
-    editor.getDocument().body.style.marginTop = 0;
-    editor.getDocument().body.style.marginBottom = 0;
+    editor.getDocument().body.style.paddingTop = '4px';
+    editor.getDocument().body.style.paddingBottom = '4px';
+    editor.getDocument().body.style.marginLeft = '6px';
+    editor.getDocument().body.style.marginRight = '6px';
+    editor.getDocument().body.style.marginTop = '0';
+    editor.getDocument().body.style.marginBottom = '0';
     // Without this line Safari may show an inner scrollbar.
     editor.getDocument().body.style.overflow = 'hidden';
     editor.observe("wysihat:change", function() {
