@@ -6,6 +6,11 @@
  *
  */
 
+WKTextViewPaddingTop = 4;
+WKTextViewPaddingBottom = 4;
+WKTextViewPaddingLeft = 6;
+WKTextViewPaddingRight = 6;
+
 /*!
     A WYSIHAT based rich text editor widget.
     
@@ -74,12 +79,11 @@
     if (editor === anEditor)
         return;
     editor = anEditor;
-    editor.getDocument().body.style.paddingTop = '4px';
-    editor.getDocument().body.style.paddingBottom = '4px';
-    editor.getDocument().body.style.marginLeft = '6px';
-    editor.getDocument().body.style.marginRight = '6px';
-    editor.getDocument().body.style.marginTop = '0';
-    editor.getDocument().body.style.marginBottom = '0';
+    editor.getDocument().body.style.paddingTop = WKTextViewPaddingTop+'px';
+    editor.getDocument().body.style.paddingBottom = WKTextViewPaddingBottom+'px';
+    editor.getDocument().body.style.paddingLeft = WKTextViewPaddingLeft+'px';
+    editor.getDocument().body.style.paddingRight = WKTextViewPaddingRight+'px';
+    editor.getDocument().body.style.margin = '0';
     // Without this line Safari may show an inner scrollbar.
     editor.getDocument().body.style.overflow = 'hidden';
     editor.observe("wysihat:change", function() {
@@ -98,12 +102,7 @@
 - (void)_didChange
 {
     // When the text changes, the height of the content may change.
-    oldHeight = _iframe.getAttribute("height");
     [self _resizeWebFrame];
-    newHeight = _iframe.getAttribute("height");
-    scrollAmount = newHeight - oldHeight;
-
-    console.log("oldHeight: "+oldHeight+" newHeight: "+newHeight);
     [self _updateScrollers];
 }
 
@@ -159,25 +158,38 @@
     if (hscroller)
         height -= [hscroller bounds].size.height;
 
-    // This needs to be before the height calculation so that the right height for the current
-    // width can be calculated.
     _iframe.setAttribute("width", width);
     
     if (_scrollMode == CPWebViewScrollAppKit && editor !== nil)
     {
         var editorBody = editor.getDocument().body;
-
         
-        // editoryBody.scrollHeight is normally correct, except it never becomes smaller even
-        // if the content does. Since in _resizeWebFrame we don't know if the content became
-        // taller or shorter, we have to do it the hard way.
-        height = 0;
-        var children = editorBody.childNodes;
-        for(i=0; i<children.length; i++)
-            height += children[i].scrollHeight;
+        // This needs to be before the height calculation so that the right height for the current
+        // width can be calculated.
+        editorBody.style.width = width-WKTextViewPaddingLeft-WKTextViewPaddingRight+"px";
+        
+        // editoryBody.scrollHeight is normally correct, except it never becomes smaller once
+        // it's gone up. Since here in _resizeWebFrame we don't know if the content became taller 
+        // or shorter, we have to do it the hard way in both cases.
+
+        // This method is based on the one implemented in Dojo's TextArea.
+        var apparentHeight = editorBody.scrollHeight;
+        // If the content isn't truly apparentHeight tall, extra padding will be absorbed into
+        // the 'fluff' space. By checking how much padding is absorbed we know the fluff size.
+        editorBody.style.paddingBottom = (WKTextViewPaddingBottom + apparentHeight) + "px";
+        editorBody.scrollTop = 0;
+        var newHeight = editorBody.scrollHeight - apparentHeight;
+        //var fluff = apparentHeight - newHeight;
+        //console.log("fluff: "+fluff);
+        editorBody.style.paddingBottom = WKTextViewPaddingBottom + "px";
+
+        // FIXME Immediately after content changes, Firefox calculates the height of the body
+        // to 0 pixels. This code alleviates the symtoms by never making the scrolling area
+        // smaller than the height available.
+        height = MAX(newHeight, height);
     }
 
-    console.log("height: "+height);
+    //console.log("width: "+width+" height: "+height);
     _iframe.setAttribute("height", height);
 
     [_frameView setFrameSize:CGSizeMake(width, height)];
@@ -205,8 +217,8 @@
  
 - (void)setHtmlValue:(CPString)content
 {   
-    [self editor].setContent(content);
-    [self editor].reload();
+    [self editor].textarea.value = content;
+    [self editor].load();
     [self _didChange];    
 }
 

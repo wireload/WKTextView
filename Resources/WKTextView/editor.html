@@ -31,17 +31,16 @@
   </style>
 
   <script type="text/javascript" src="wysihat.js"></script>
+</head>
 
+<body>
   <script type="text/javascript" charset="utf-8">
     Event.observe(window, 'load', function() {
       editor = WysiHat.Editor.attach('textarea');
       $('loading').hide();
-    });
-    
+    });    
   </script>
-</head>
-
-<body>
+  
   <p id="loading">Loading editor...</p>
   <textarea id="textarea"></textarea>
 </body>
