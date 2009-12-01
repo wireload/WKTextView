@@ -22,6 +22,8 @@ var NewToolbarItemIdentifier = "NewToolbarItemIdentifier",
     UnlinkToolbarItemIdentifier = "UnlinkToolbarItemIdentifier",
     InsertImageToolbarItemIdentifier = "InsertImageToolbarItemIdentifier",
     FontToolbarItemIdentifier = "FontToolbarItemIdentifier",
+    BulletsToolbarItemIdentifier = "BulletsToolbarItemIdentifier",
+    NumbersToolbarItemIdentifier = "NumbersToolbarItemIdentifier",
     RandomTextToolbarItemIdentifier = "RandomTextToolbarItemIdentifier";
 
 @implementation AppController : CPObject
@@ -51,7 +53,7 @@ var NewToolbarItemIdentifier = "NewToolbarItemIdentifier",
 // Return an array of toolbar item identifier (all the toolbar items that may be present in the toolbar)
 - (CPArray)toolbarAllowedItemIdentifiers:(CPToolbar)aToolbar
 {
-    return [NewToolbarItemIdentifier, CPToolbarSpaceItemIdentifier, BoldToolbarItemIdentifier, ItalicsToolbarItemIdentifier, UnderlineToolbarItemIdentifier, StrikethroughToolbarItemIdentifier, CPToolbarSpaceItemIdentifier, AlignLeftToolbarItemIdentifier, AlignRightToolbarItemIdentifier, AlignCenterToolbarItemIdentifier, AlignFullToolbarItemIdentifier, CPToolbarSpaceItemIdentifier, InsertLinkToolbarItemIdentifier, UnlinkToolbarItemIdentifier, InsertImageToolbarItemIdentifier, FontToolbarItemIdentifier, CPToolbarFlexibleSpaceItemIdentifier, RandomTextToolbarItemIdentifier];
+    return [NewToolbarItemIdentifier, CPToolbarSpaceItemIdentifier, BoldToolbarItemIdentifier, ItalicsToolbarItemIdentifier, UnderlineToolbarItemIdentifier, StrikethroughToolbarItemIdentifier, CPToolbarSpaceItemIdentifier, AlignLeftToolbarItemIdentifier, AlignRightToolbarItemIdentifier, AlignCenterToolbarItemIdentifier, AlignFullToolbarItemIdentifier, CPToolbarSpaceItemIdentifier, BulletsToolbarItemIdentifier, NumbersToolbarItemIdentifier, InsertLinkToolbarItemIdentifier, UnlinkToolbarItemIdentifier, InsertImageToolbarItemIdentifier, FontToolbarItemIdentifier, CPToolbarFlexibleSpaceItemIdentifier, RandomTextToolbarItemIdentifier];
 }
 
 // Return an array of toolbar item identifier (the default toolbar items that are present in the toolbar)
@@ -73,13 +75,15 @@ var NewToolbarItemIdentifier = "NewToolbarItemIdentifier",
         NewToolbarItemIdentifier:           { 'image': 'page_white.png',        'label': 'New',             'target': editorView,   'action':@selector(clearText:) },
         BoldToolbarItemIdentifier:          { 'image': 'text_bold.png',         'label': 'Bold',            'target': editorView,   'action':@selector(boldSelection:) },
         ItalicsToolbarItemIdentifier:       { 'image': 'text_italic.png',       'label': 'Italics',         'target': editorView,   'action':@selector(italicSelection:) },
-        UnderlineToolbarItemIdentifier:     { 'image': 'text_underline.png',    'label': 'Underline',       'target': editorView,   'action':@selector(underlineSelection:) },
-        RandomTextToolbarItemIdentifier:    { 'image': 'page_white_text.png',   'label': 'Lorem Ipsum',     'target': self,         'action':@selector(setRandomText:) },
+        UnderlineToolbarItemIdentifier:     { 'image': 'text_underline.png',    'label': 'Under',           'target': editorView,   'action':@selector(underlineSelection:) },
+        RandomTextToolbarItemIdentifier:    { 'image': 'page_white_text.png',   'label': 'Lorem',           'target': self,         'action':@selector(setRandomText:) },
         StrikethroughToolbarItemIdentifier: { 'image': 'text_strikethrough.png','label': 'Strike',          'target': editorView,   'action':@selector(strikethroughSelection:) },
         AlignLeftToolbarItemIdentifier:     { 'image': 'text_align_left.png',   'label': 'Left',            'target': editorView,   'action':@selector(alignSelectionLeft:) },
         AlignRightToolbarItemIdentifier:    { 'image': 'text_align_right.png',  'label': 'Right',           'target': editorView,   'action':@selector(alignSelectionRight:) },
         AlignCenterToolbarItemIdentifier:   { 'image': 'text_align_center.png', 'label': 'Center',          'target': editorView,   'action':@selector(alignSelectionCenter:) },
         AlignFullToolbarItemIdentifier:     { 'image': 'text_align_justify.png','label': 'Justify',         'target': editorView,   'action':@selector(alignSelectionFull:) },
+        BulletsToolbarItemIdentifier:       { 'image': 'text_list_bullets.png', 'label': 'Bullets',          'target': editorView,   'action':@selector(insertUnorderedList:) },
+        NumbersToolbarItemIdentifier:       { 'image': 'text_list_numbers.png', 'label': 'Numbers',          'target': editorView,   'action':@selector(insertOrderedList:) },
         InsertLinkToolbarItemIdentifier:    { 'image': 'link.png',              'label': 'Link',            'target': self,         'action':@selector(doLink:) },
         UnlinkToolbarItemIdentifier:        { 'image': 'link_break.png',        'label': 'Unlink',          'target': editorView,   'action':@selector(unlinkSelection:) },
         InsertImageToolbarItemIdentifier:   { 'image': 'picture.png',           'label': 'Image',           'target': self,         'action':@selector(doImage:) },
