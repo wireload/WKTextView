@@ -18,6 +18,9 @@ var NewToolbarItemIdentifier = "NewToolbarItemIdentifier",
     AlignRightToolbarItemIdentifier = "AlignRightToolbarItemIdentifier",
     AlignCenterToolbarItemIdentifier = "AlignCenterToolbarItemIdentifier",
     AlignFullToolbarItemIdentifier = "AlignFullToolbarItemIdentifier",
+    InsertLinkToolbarItemIdentifier = "InsertLinkToolbarItemIdentifier",
+    UnlinkToolbarItemIdentifier = "UnlinkToolbarItemIdentifier",
+    InsertImageToolbarItemIdentifier = "InsertImageToolbarItemIdentifier",
     RandomTextToolbarItemIdentifier = "RandomTextToolbarItemIdentifier";
 
 @implementation AppController : CPObject
@@ -46,13 +49,13 @@ var NewToolbarItemIdentifier = "NewToolbarItemIdentifier",
 // Return an array of toolbar item identifier (all the toolbar items that may be present in the toolbar)
 - (CPArray)toolbarAllowedItemIdentifiers:(CPToolbar)aToolbar
 {
-    return [NewToolbarItemIdentifier, BoldToolbarItemIdentifier, ItalicsToolbarItemIdentifier, UnderlineToolbarItemIdentifier, StrikethroughToolbarItemIdentifier, AlignLeftToolbarItemIdentifier, AlignRightToolbarItemIdentifier, AlignCenterToolbarItemIdentifier, AlignFullToolbarItemIdentifier, CPToolbarFlexibleSpaceItemIdentifier, RandomTextToolbarItemIdentifier];
+    return [NewToolbarItemIdentifier, BoldToolbarItemIdentifier, ItalicsToolbarItemIdentifier, UnderlineToolbarItemIdentifier, StrikethroughToolbarItemIdentifier, AlignLeftToolbarItemIdentifier, AlignRightToolbarItemIdentifier, AlignCenterToolbarItemIdentifier, AlignFullToolbarItemIdentifier, InsertLinkToolbarItemIdentifier, UnlinkToolbarItemIdentifier, InsertImageToolbarItemIdentifier, CPToolbarFlexibleSpaceItemIdentifier, RandomTextToolbarItemIdentifier];
 }
 
 // Return an array of toolbar item identifier (the default toolbar items that are present in the toolbar)
 - (CPArray)toolbarDefaultItemIdentifiers:(CPToolbar)aToolbar
 {
-    return [NewToolbarItemIdentifier, BoldToolbarItemIdentifier, ItalicsToolbarItemIdentifier, UnderlineToolbarItemIdentifier, StrikethroughToolbarItemIdentifier, AlignLeftToolbarItemIdentifier, AlignRightToolbarItemIdentifier, AlignCenterToolbarItemIdentifier, AlignFullToolbarItemIdentifier, CPToolbarFlexibleSpaceItemIdentifier, RandomTextToolbarItemIdentifier];
+    return [self toolbarAllowedItemIdentifiers:aToolbar];
 }
 
 // Create the toolbar item that is requested by the toolbar.
@@ -75,6 +78,9 @@ var NewToolbarItemIdentifier = "NewToolbarItemIdentifier",
 	    AlignRightToolbarItemIdentifier:    { 'image': 'text_align_right.png',  'label': 'Right',           'target': editorView,   'action':@selector(alignSelectionRight:) },
 	    AlignCenterToolbarItemIdentifier:   { 'image': 'text_align_center.png', 'label': 'Center',          'target': editorView,   'action':@selector(alignSelectionCenter:) },
 	    AlignFullToolbarItemIdentifier:     { 'image': 'text_align_justify.png','label': 'Justify',         'target': editorView,   'action':@selector(alignSelectionFull:) },
+	    InsertLinkToolbarItemIdentifier:    { 'image': 'link.png',              'label': 'Link',            'target': self,         'action':@selector(doLink:) },
+	    UnlinkToolbarItemIdentifier:        { 'image': 'link_break.png',        'label': 'Unlink',          'target': editorView,   'action':@selector(unlinkSelection:) },
+	    InsertImageToolbarItemIdentifier:   { 'image': 'picture.png',           'label': 'Image',           'target': self,         'action':@selector(doImage:) },
 	};
 
     action = actionMap[anItemIdentifier];
@@ -93,6 +99,21 @@ var NewToolbarItemIdentifier = "NewToolbarItemIdentifier",
     
     return toolbarItem;
 }
+
+- (@action)doLink:sender
+{
+    var link = prompt("Enter a link: ", "http://www.280north.com");
+    if (link)
+        [editorView linkSelectionToURL:link];
+}
+
+- (@action)doImage:sender
+{
+    var link = prompt("Enter an image URL: ", "http://objective-j.org/images/cappuccino-icon.png");
+    if (link)
+        [editorView insertImageWithURL:link];
+}
+
 
 - (@action)setRandomText:sender 
 {
