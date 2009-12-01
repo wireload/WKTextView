@@ -86,6 +86,9 @@ WKTextViewPaddingRight = 6;
     editor.getDocument().body.style.margin = '0';
     // Without this line Safari may show an inner scrollbar.
     editor.getDocument().body.style.overflow = 'hidden';
+    
+    [self setFont:"Verdana"];
+    
     editor.observe("wysihat:change", function() {
         [[CPRunLoop currentRunLoop] performSelector:"_didChange" target:self argument:nil order:0 modes:[CPDefaultRunLoopMode]];
         // The normal run loop doesn't react to iframe events, so force immediate processing.
@@ -112,6 +115,10 @@ WKTextViewPaddingRight = 6;
 
 - (void)_cursorDidMove
 {
+    if ([delegate respondsToSelector:@selector(textViewCursorDidMove:)])
+    {
+        [delegate textViewCursorDidMove:self];
+    }
     
 /*    n = editor.selection.getNode();
     
@@ -287,7 +294,20 @@ WKTextViewPaddingRight = 6;
     [self editor].insertImage(aUrl);
 }
 
-- (void)fontSelection:(CPString)font
+- (void)setFont:(CPString)font
 {
     [self editor].fontSelection(font);
+}
+
+- (CPString)font
+{
+    var fontName = [self editor].fontSelected();
+    // The font name may come through with quotes e.g. 'Apple Chancery'
+    var format = /'(.*?)'/,
+        r = fontName.match(new RegExp(format));
+    
+    if (r && r.length == 2)
+        return r[1];
+
+    return fontName;
 }

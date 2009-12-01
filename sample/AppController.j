@@ -26,7 +26,8 @@ var NewToolbarItemIdentifier = "NewToolbarItemIdentifier",
 
 @implementation AppController : CPObject
 {
-    WKTextView editorView;
+    WKTextView  editorView;
+    CPToolBar   toolbar;
 }
 
 - (void)applicationDidFinishLaunching:(CPNotification)aNotification
@@ -39,7 +40,7 @@ var NewToolbarItemIdentifier = "NewToolbarItemIdentifier",
     [editorView setDelegate:self];
     [contentView addSubview:editorView];
 
-    var toolbar = [[CPToolbar alloc] initWithIdentifier:"Styling"];
+    toolbar = [[CPToolbar alloc] initWithIdentifier:"Styling"];
     [toolbar setDelegate:self];
     [toolbar setVisible:YES];
     [theWindow setToolbar:toolbar];
@@ -50,7 +51,7 @@ var NewToolbarItemIdentifier = "NewToolbarItemIdentifier",
 // Return an array of toolbar item identifier (all the toolbar items that may be present in the toolbar)
 - (CPArray)toolbarAllowedItemIdentifiers:(CPToolbar)aToolbar
 {
-    return [NewToolbarItemIdentifier, CPToolbarSpaceItemIdentifier, BoldToolbarItemIdentifier, ItalicsToolbarItemIdentifier, UnderlineToolbarItemIdentifier, StrikethroughToolbarItemIdentifier, AlignLeftToolbarItemIdentifier, AlignRightToolbarItemIdentifier, AlignCenterToolbarItemIdentifier, AlignFullToolbarItemIdentifier, InsertLinkToolbarItemIdentifier, UnlinkToolbarItemIdentifier, InsertImageToolbarItemIdentifier, CPToolbarFlexibleSpaceItemIdentifier, RandomTextToolbarItemIdentifier];
+    return [NewToolbarItemIdentifier, CPToolbarSpaceItemIdentifier, BoldToolbarItemIdentifier, ItalicsToolbarItemIdentifier, UnderlineToolbarItemIdentifier, StrikethroughToolbarItemIdentifier, CPToolbarSpaceItemIdentifier, AlignLeftToolbarItemIdentifier, AlignRightToolbarItemIdentifier, AlignCenterToolbarItemIdentifier, AlignFullToolbarItemIdentifier, CPToolbarSpaceItemIdentifier, InsertLinkToolbarItemIdentifier, UnlinkToolbarItemIdentifier, InsertImageToolbarItemIdentifier, FontToolbarItemIdentifier, CPToolbarFlexibleSpaceItemIdentifier, RandomTextToolbarItemIdentifier];
 }
 
 // Return an array of toolbar item identifier (the default toolbar items that are present in the toolbar)
@@ -74,7 +75,7 @@ var NewToolbarItemIdentifier = "NewToolbarItemIdentifier",
         ItalicsToolbarItemIdentifier:       { 'image': 'text_italic.png',       'label': 'Italics',         'target': editorView,   'action':@selector(italicSelection:) },
         UnderlineToolbarItemIdentifier:     { 'image': 'text_underline.png',    'label': 'Underline',       'target': editorView,   'action':@selector(underlineSelection:) },
         RandomTextToolbarItemIdentifier:    { 'image': 'page_white_text.png',   'label': 'Lorem Ipsum',     'target': self,         'action':@selector(setRandomText:) },
-        StrikethroughToolbarItemIdentifier: { 'image': 'text_strikethrough.png','label': 'Strikethrough',   'target': editorView,   'action':@selector(strikethroughSelection:) },
+        StrikethroughToolbarItemIdentifier: { 'image': 'text_strikethrough.png','label': 'Strike',          'target': editorView,   'action':@selector(strikethroughSelection:) },
         AlignLeftToolbarItemIdentifier:     { 'image': 'text_align_left.png',   'label': 'Left',            'target': editorView,   'action':@selector(alignSelectionLeft:) },
         AlignRightToolbarItemIdentifier:    { 'image': 'text_align_right.png',  'label': 'Right',           'target': editorView,   'action':@selector(alignSelectionRight:) },
         AlignCenterToolbarItemIdentifier:   { 'image': 'text_align_center.png', 'label': 'Center',          'target': editorView,   'action':@selector(alignSelectionCenter:) },
@@ -108,7 +109,7 @@ var NewToolbarItemIdentifier = "NewToolbarItemIdentifier",
 
         var fonts = [[CPFontManager sharedFontManager] availableFonts];
 
-        for(var i=0; i<fonts.length; i++)
+        for(i=0; i<fonts.length; i++)
         {
             var fontName = fonts[i],
                 menuItem = [[CPMenuItem alloc] initWithTitle:fontName action:nil keyEquivalent:nil];
@@ -124,7 +125,7 @@ var NewToolbarItemIdentifier = "NewToolbarItemIdentifier",
 
 - (void)doFont:button {
     var fontName = [button titleOfSelectedItem];
-    [editorView fontSelection:fontName];
+    [editorView setFont:fontName];
 }
 
 - (@action)doLink:sender
@@ -149,6 +150,22 @@ var NewToolbarItemIdentifier = "NewToolbarItemIdentifier",
 
 - (void)textViewDidLoad:textView
 {
+    // Update the selected font.
+    [self textViewCursorDidMove:textView];
+}
+
+- (void)textViewCursorDidMove:textView
+{
+    var items = [toolbar visibleItems];
+    for (i=0; i<items.length; i++)
+    {
+        var item = items[i];
+        if ([item itemIdentifier] == FontToolbarItemIdentifier)
+        {
+            var font = [editorView font];
+            [[item view] selectItemWithTitle:font];
+        }
+    }
 }
 
 @end
