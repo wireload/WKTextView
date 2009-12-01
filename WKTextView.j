@@ -87,10 +87,14 @@ WKTextViewPaddingRight = 6;
     // Without this line Safari may show an inner scrollbar.
     editor.getDocument().body.style.overflow = 'hidden';
     editor.observe("wysihat:change", function() {
-        [[CPRunLoop mainRunLoop] performSelector:"_didChange" target:self argument:nil order:0 modes:[CPDefaultRunLoopMode]];
+        [[CPRunLoop currentRunLoop] performSelector:"_didChange" target:self argument:nil order:0 modes:[CPDefaultRunLoopMode]];
+        // The normal run loop doesn't react to iframe events, so force immediate processing.
+        [[CPRunLoop currentRunLoop] limitDateForMode:CPDefaultRunLoopMode];
     });
     editor.observe("wysihat:cursormove", function() {
-        [[CPRunLoop mainRunLoop] performSelector:"_cursorDidMove" target:self argument:nil order:0 modes:[CPDefaultRunLoopMode]];
+        [[CPRunLoop currentRunLoop] performSelector:"_cursorDidMove" target:self argument:nil order:0 modes:[CPDefaultRunLoopMode]];
+        // The normal run loop doesn't react to iframe events, so force immediate processing.
+        [[CPRunLoop currentRunLoop] limitDateForMode:CPDefaultRunLoopMode];
     });
 }
 
@@ -120,26 +124,7 @@ WKTextViewPaddingRight = 6;
 
 - (void)_updateScrollers
 {
-    // None of this works.
-    /*[_scrollView setHasVerticalScroller:NO];
-    [_scrollView setHasVerticalScroller:YES];
-    
-    [_scrollView reflectScrolledClipView:[_scrollView contentView]];
-    
-    var scroller = [_scrollView verticalScroller];
-    
-    [scroller setNeedsDisplay:YES];
-    [scroller setNeedsLayout];
-        
-    scroller = [_scrollView horizontalScroller];
-    
-    [scroller setNeedsDisplay:YES];
-    [scroller setNeedsLayout];*/
-
     [_scrollView setNeedsDisplay:YES];
-    [_scrollView setNeedsLayout];
-    //[[self superview] setNeedsLayout];
-    //[_scrollView setDocumentView:_frameView];
 }
  
 - (BOOL)_resizeWebFrame
