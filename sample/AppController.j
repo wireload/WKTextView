@@ -13,8 +13,12 @@ var NewToolbarItemIdentifier = "NewToolbarItemIdentifier",
     BoldToolbarItemIdentifier = "BoldToolbarItemIdentifier",
     ItalicsToolbarItemIdentifier = "ItalicsToolbarItemIdentifier",
     UnderlineToolbarItemIdentifier = "UnderlineToolbarItemIdentifier",
+    StrikethroughToolbarItemIdentifier = "StrikethroughToolbarItemIdentifier",
+    AlignLeftToolbarItemIdentifier = "AlignLeftToolbarItemIdentifier",
+    AlignRightToolbarItemIdentifier = "AlignRightToolbarItemIdentifier",
+    AlignCenterToolbarItemIdentifier = "AlignCenterToolbarItemIdentifier",
+    AlignFullToolbarItemIdentifier = "AlignFullToolbarItemIdentifier",
     RandomTextToolbarItemIdentifier = "RandomTextToolbarItemIdentifier";
-
 
 @implementation AppController : CPObject
 {
@@ -42,13 +46,13 @@ var NewToolbarItemIdentifier = "NewToolbarItemIdentifier",
 // Return an array of toolbar item identifier (all the toolbar items that may be present in the toolbar)
 - (CPArray)toolbarAllowedItemIdentifiers:(CPToolbar)aToolbar
 {
-    return [CPToolbarFlexibleSpaceItemIdentifier, BoldToolbarItemIdentifier, ItalicsToolbarItemIdentifier, UnderlineToolbarItemIdentifier, RandomTextToolbarItemIdentifier, NewToolbarItemIdentifier];
+    return [NewToolbarItemIdentifier, BoldToolbarItemIdentifier, ItalicsToolbarItemIdentifier, UnderlineToolbarItemIdentifier, StrikethroughToolbarItemIdentifier, AlignLeftToolbarItemIdentifier, AlignRightToolbarItemIdentifier, AlignCenterToolbarItemIdentifier, AlignFullToolbarItemIdentifier, CPToolbarFlexibleSpaceItemIdentifier, RandomTextToolbarItemIdentifier];
 }
 
 // Return an array of toolbar item identifier (the default toolbar items that are present in the toolbar)
 - (CPArray)toolbarDefaultItemIdentifiers:(CPToolbar)aToolbar
 {
-    return [NewToolbarItemIdentifier, BoldToolbarItemIdentifier, ItalicsToolbarItemIdentifier, UnderlineToolbarItemIdentifier, CPToolbarFlexibleSpaceItemIdentifier, RandomTextToolbarItemIdentifier];
+    return [NewToolbarItemIdentifier, BoldToolbarItemIdentifier, ItalicsToolbarItemIdentifier, UnderlineToolbarItemIdentifier, StrikethroughToolbarItemIdentifier, AlignLeftToolbarItemIdentifier, AlignRightToolbarItemIdentifier, AlignCenterToolbarItemIdentifier, AlignFullToolbarItemIdentifier, CPToolbarFlexibleSpaceItemIdentifier, RandomTextToolbarItemIdentifier];
 }
 
 // Create the toolbar item that is requested by the toolbar.
@@ -58,68 +62,34 @@ var NewToolbarItemIdentifier = "NewToolbarItemIdentifier",
     var toolbarItem = [[CPToolbarItem alloc] initWithItemIdentifier:anItemIdentifier];
 
 	var mainBundle = [CPBundle mainBundle];
+	
+	var actionMap = 
+	{
+	    NewToolbarItemIdentifier:           { 'image': 'page_white.png',        'label': 'New',             'target': editorView,   'action':@selector(clearText:) },
+	    BoldToolbarItemIdentifier:          { 'image': 'text_bold.png',         'label': 'Bold',            'target': editorView,   'action':@selector(boldSelection:) },
+	    ItalicsToolbarItemIdentifier:       { 'image': 'text_italic.png',       'label': 'Italics',         'target': editorView,   'action':@selector(italicSelection:) },
+	    UnderlineToolbarItemIdentifier:     { 'image': 'text_underline.png',    'label': 'Underline',       'target': editorView,   'action':@selector(underlineSelection:) },
+	    RandomTextToolbarItemIdentifier:    { 'image': 'page_white_text.png',   'label': 'Lorem Ipsum',     'target': self,         'action':@selector(setRandomText:) },
+	    StrikethroughToolbarItemIdentifier: { 'image': 'text_strikethrough.png','label': 'Strikethrough',   'target': editorView,   'action':@selector(strikethroughSelection:) },
+	    AlignLeftToolbarItemIdentifier:     { 'image': 'text_align_left.png',   'label': 'Left',            'target': editorView,   'action':@selector(alignSelectionLeft:) },
+	    AlignRightToolbarItemIdentifier:    { 'image': 'text_align_right.png',  'label': 'Right',           'target': editorView,   'action':@selector(alignSelectionRight:) },
+	    AlignCenterToolbarItemIdentifier:   { 'image': 'text_align_center.png', 'label': 'Center',          'target': editorView,   'action':@selector(alignSelectionCenter:) },
+	    AlignFullToolbarItemIdentifier:     { 'image': 'text_align_justify.png','label': 'Justify',         'target': editorView,   'action':@selector(alignSelectionFull:) },
+	};
 
-    if (anItemIdentifier == NewToolbarItemIdentifier)
+    action = actionMap[anItemIdentifier];
+    if (action)
     {
-    	var image = [[CPImage alloc] initWithContentsOfFile:[mainBundle pathForResource:@"tango/document-new.png"] size:CPSizeMake(32, 32)];
+    	var image = [[CPImage alloc] initWithContentsOfFile:[mainBundle pathForResource:@"silk/"+action['image']] size:CPSizeMake(16, 16)];
     	[toolbarItem setImage:image];
 
-        [toolbarItem setTarget:editorView];
-        [toolbarItem setAction:@selector(clearText:)];
-        [toolbarItem setLabel:"New"];
+        [toolbarItem setTarget:action['target']];
+        [toolbarItem setAction:action['action']];
+        [toolbarItem setLabel:action['label']];
 
-        [toolbarItem setMinSize:CGSizeMake(32, 32)];
-        [toolbarItem setMaxSize:CGSizeMake(32, 32)];
+        [toolbarItem setMinSize:CGSizeMake(16, 16)];
+        [toolbarItem setMaxSize:CGSizeMake(16, 16)];        
     }
-    else if (anItemIdentifier == BoldToolbarItemIdentifier)
-    {
-    	var image = [[CPImage alloc] initWithContentsOfFile:[mainBundle pathForResource:@"tango/format-text-bold.png"] size:CPSizeMake(32, 32)];
-    	[toolbarItem setImage:image];
-
-        [toolbarItem setTarget:editorView];
-        [toolbarItem setAction:@selector(boldSelection:)];
-        [toolbarItem setLabel:"Bold"];
-
-        [toolbarItem setMinSize:CGSizeMake(32, 32)];
-        [toolbarItem setMaxSize:CGSizeMake(32, 32)];
-    }
-    else if (anItemIdentifier == ItalicsToolbarItemIdentifier)
-    {
-        var image = [[CPImage alloc] initWithContentsOfFile:[mainBundle pathForResource:@"tango/format-text-italic.png"] size:CPSizeMake(32, 32)];
-    	[toolbarItem setImage:image];
-    	
-        [toolbarItem setTarget:editorView];
-        [toolbarItem setAction:@selector(italicSelection:)];
-        [toolbarItem setLabel:"Italics"];
-
-        [toolbarItem setMinSize:CGSizeMake(32, 32)];
-        [toolbarItem setMaxSize:CGSizeMake(32, 32)];
-    }
-    else if (anItemIdentifier == UnderlineToolbarItemIdentifier)
-    {
-        var image = [[CPImage alloc] initWithContentsOfFile:[mainBundle pathForResource:@"tango/format-text-underline.png"] size:CPSizeMake(32, 32)];
-    	[toolbarItem setImage:image];
-
-        [toolbarItem setTarget:editorView];
-        [toolbarItem setAction:@selector(underlineSelection:)];
-        [toolbarItem setLabel:"Underline"];
-
-        [toolbarItem setMinSize:CGSizeMake(32, 32)];
-        [toolbarItem setMaxSize:CGSizeMake(32, 32)];
-    }
-    else if (anItemIdentifier == RandomTextToolbarItemIdentifier)
-    {
-        var image = [[CPImage alloc] initWithContentsOfFile:[mainBundle pathForResource:@"tango/format-justify-fill.png"] size:CPSizeMake(32, 32)];
-    	[toolbarItem setImage:image];
-
-        [toolbarItem setTarget:self];
-        [toolbarItem setAction:@selector(setRandomText:)];
-        [toolbarItem setLabel:"Lorem ipsum"];
-
-        [toolbarItem setMinSize:CGSizeMake(32, 32)];
-        [toolbarItem setMaxSize:CGSizeMake(32, 32)];
-    }
-
     
     return toolbarItem;
 }

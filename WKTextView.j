@@ -241,3 +241,63 @@ WKTextViewPaddingRight = 6;
 {
     [self editor].italicSelection();
 }
+
+- (@action)strikethroughSelection:(id)sender
+{
+    [self editor].strikethroughSelection();
+}
+
+- (@action)alignSelectionLeft:(id)sender
+{
+    [self editor].alignSelection('left');
+}
+
+- (@action)alignSelectionRight:(id)sender
+{
+    [self editor].alignSelection('right');
+}
+
+- (@action)alignSelectionCenter:(id)sender
+{
+    [self editor].alignSelection('center');
+}
+
+- (@action)alignSelectionFull:(id)sender
+{
+    [self editor].alignSelection('full');
+}
+
+- (@action)linkSelection:(id)sender
+{
+    // TODO Show a sheet asking for a URL to link to.
+}
+
+- (void)linkSelectionToURL:(CPString)aUrl
+{
+    [self editor].linkSelection(aUrl);
+}
+
+- (void)unlinkSelection:(id)sender
+{
+    [self editor].unlinkSelection();
+}
+
+- (@action)insertOrderedList:(id)sender
+{
+    [self editor].insertOrderedList();
+}
+
+- (@action)insertUnorderedList:(id)sender
+{
+    [self editor].insertUnorderedList();
+}
+
+- (@action)insertImage:(id)sender
+{
+    // TODO Show a sheet asking for an image URL.
+}
+
+- (void)insertImageWithURL:(CPString)aUrl
+{
+    [self editor].insertImage(aUrl);
+}

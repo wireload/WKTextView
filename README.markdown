@@ -43,7 +43,7 @@ Then open up `index-debug.html` in a browser.
 
 # License
 
-WysihatKit is released under the MIT license. The sample incorporates public domain icons from the [Tango Icon Library](http://tango.freedesktop.org/Tango_Icon_Library). 
+WysihatKit is released under the MIT license. The sample incorporates Creative Commons icons from [FamFamFam](http://www.famfamfam.com/lab/icons/silk/).
 
 # Authors
 
