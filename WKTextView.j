@@ -301,3 +301,8 @@ WKTextViewPaddingRight = 6;
 {
     [self editor].insertImage(aUrl);
 }
+
+- (void)fontSelection:(CPString)font
+{
+    [self editor].fontSelection(font);
+}
