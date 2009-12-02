@@ -11,12 +11,12 @@ Link the `WyziHat` folder into your `Frameworks` folder. Then copy `Wyzihat/Reso
 
 Create and combine the `wyzihat.js` file using the WyzihatKit modified version of WyziHat:
 
-  git submodule init
-  git submodule update
-  cd wyzihat
-  git submodule init
-  git submodule update
-  rake
+	git submodule init
+	git submodule update
+	cd wyzihat
+	git submodule init
+	git submodule update
+	rake
 	cat dist/prototype.js dist/wysihat.js >../Resources/WKTextView/wyzihat.js
 	
 Optionally minify the combined `wyzihat.js` - it will shrink very well.
