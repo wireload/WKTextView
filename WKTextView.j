@@ -22,6 +22,7 @@ WKTextViewPaddingRight = 6;
     CPTimer     loadTimer;
     JSObject    editor;
     BOOL        shouldFocusAfterAction;
+    BOOL        suppressAutoFocus;
 }
 
 - (id)initWithFrame:(CGRect)aFrame
@@ -104,7 +105,9 @@ WKTextViewPaddingRight = 6;
     // Without this line Safari may show an inner scrollbar.
     editor.getDocument().body.style.overflow = 'hidden';
     
+    suppressAutoFocus = YES;    
     [self setFont:"Verdana"];
+    suppressAutoFocus = NO;
     
     editor.observe("wysihat:change", function() {
         [[CPRunLoop currentRunLoop] performSelector:"_didChange" target:self argument:nil order:0 modes:[CPDefaultRunLoopMode]];
@@ -237,15 +240,15 @@ WKTextViewPaddingRight = 6;
 
 - (void)setTextValue:(CPString)content
 {   
-    [self editor].textarea.value = content;
-    [self editor].load();
+    [self editor].setContent(content);
     [self _didChange];    
 }
 
 - (void)_didPerformAction
 {
-    if (shouldFocusAfterAction)
+    if (shouldFocusAfterAction && !suppressAutoFocus) {
         [self editor].focus();
+    }
 }
 
 - (@action)clearText:(id)sender
