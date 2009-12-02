@@ -21,12 +21,14 @@ WKTextViewPaddingRight = 6;
     id          delegate @accessors;
     CPTimer     loadTimer;
     JSObject    editor;
+    BOOL        shouldFocusAfterAction;
 }
 
 - (id)initWithFrame:(CGRect)aFrame
 {
     if (self = [super initWithFrame:aFrame])
     {
+        shouldFocusAfterAction = YES;
         [self setScrollMode:CPWebViewScrollAppKit];
         [self setMainFrameURL:[[CPBundle mainBundle] pathForResource:"WKTextView/editor.html"]];
         // Check if the document was loaded immediately. This could happen if we're loaded from
@@ -72,6 +74,21 @@ WKTextViewPaddingRight = 6;
         if (!loadTimer)
             loadTimer = [CPTimer scheduledTimerWithTimeInterval:0.1 target:self selector:"checkLoad" userInfo:nil repeats:YES];        
     }
+}
+
+/*!
+    Sets whether the editor should automatically take focus after an action
+    method is invoked such as boldSelection or setFont. This is useful when
+    binding to a toolbar.
+*/
+- (void)setShouldFocusAfterAction:(BOOL)aFlag
+{
+    shouldFocusAfterAction = aFlag;
+}
+
+- (BOOL)shouldFocusAfterAction
+{
+    return shouldFocusAfterAction;
 }
 
 - (void)setEditor:anEditor
@@ -204,59 +221,87 @@ WKTextViewPaddingRight = 6;
 
 - (CPString)htmlValue
 {
+    return [self editor].rawContent();
+}
+
+- (CPString)textValue
+{
     return [self editor].content();
 }
- 
-- (void)setHtmlValue:(CPString)content
+
+- (void)setTextValue:(CPString)content
 {   
     [self editor].textarea.value = content;
     [self editor].load();
     [self _didChange];    
 }
 
+- (void)_didPerformAction
+{
+    if (shouldFocusAfterAction)
+        [self editor].focus();
+}
+
 - (@action)clearText:(id)sender
 {
     [self setHtmlValue:""];
+    [self _didChange];    
+    [self _didPerformAction];
 }
- 
+
+- (void)insertHtml:(CPString)html
+{
+    [self editor].insertHTML(html);
+    [self _didChange];    
+    [self _didPerformAction];
+}
+
 - (@action)boldSelection:(id)sender
 {
     [self editor].boldSelection();
+    [self _didPerformAction];
 }
 
 - (@action)underlineSelection:(id)sender
 {
     [self editor].underlineSelection();
+    [self _didPerformAction];
 }
 
 - (@action)italicSelection:(id)sender
 {
     [self editor].italicSelection();
+    [self _didPerformAction];
 }
 
 - (@action)strikethroughSelection:(id)sender
 {
     [self editor].strikethroughSelection();
+    [self _didPerformAction];
 }
 
 - (@action)alignSelectionLeft:(id)sender
 {
     [self editor].alignSelection('left');
+    [self _didPerformAction];
 }
 
 - (@action)alignSelectionRight:(id)sender
 {
     [self editor].alignSelection('right');
+    [self _didPerformAction];
 }
 
 - (@action)alignSelectionCenter:(id)sender
 {
     [self editor].alignSelection('center');
+    [self _didPerformAction];
 }
 
 - (@action)alignSelectionFull:(id)sender
 {
     [self editor].alignSelection('full');
+    [self _didPerformAction];
 }
 
 - (@action)linkSelection:(id)sender
@@ -267,21 +312,25 @@ WKTextViewPaddingRight = 6;
 - (void)linkSelectionToURL:(CPString)aUrl
 {
     [self editor].linkSelection(aUrl);
+    [self _didPerformAction];
 }
 
 - (void)unlinkSelection:(id)sender
 {
     [self editor].unlinkSelection();
+    [self _didPerformAction];
 }
 
 - (@action)insertOrderedList:(id)sender
 {
     [self editor].insertOrderedList();
+    [self _didPerformAction];
 }
 
 - (@action)insertUnorderedList:(id)sender
 {
     [self editor].insertUnorderedList();
+    [self _didPerformAction];
 }
 
 - (@action)insertImage:(id)sender
@@ -292,11 +341,13 @@ WKTextViewPaddingRight = 6;
 - (void)insertImageWithURL:(CPString)aUrl
 {
     [self editor].insertImage(aUrl);
+    [self _didPerformAction];
 }
 
 - (void)setFont:(CPString)font
 {
     [self editor].fontSelection(font);
+    [self _didPerformAction];
 }
 
 - (CPString)font
