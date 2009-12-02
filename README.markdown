@@ -7,7 +7,7 @@ This is mostly a hack for use until a proper rich text capable CPTextView is int
 
 ## Installation
 
-Link the `WyziHat` folder into your `Frameworks` folder. Then copy `Wysihat/Resources/WKTextView` into `Resources/WKTextView`. 
+Link the `WyzihatKit` folder into your `Frameworks` folder. Then copy `WyzihatKit/Resources/WKTextView` into `Resources/WKTextView`. 
 
 Create and combine the `wyzihat.js` file using the WyzihatKit modified version of WysiHat:
 
@@ -29,7 +29,7 @@ Copy your combined `wysihat.js` into your deployment `Resources/WKTextView`.
 	[textView setAutoresizingMask:CPViewWidthSizable | CPViewHeightSizable];    
 	[textView setDelegate:self];
 
-The view needs to load resources such as `editor.html` and `wyzihat.js`. Wait for the `textViewDidLoad:` delegate call before using.
+The view needs to load resources such as `editor.html` and `wysihat.js`. Wait for the `textViewDidLoad:` delegate call before using.
 
 ## Sample
 
