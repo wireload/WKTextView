@@ -55,7 +55,7 @@ WKTextViewPaddingRight = 6;
 {
     // Is the editor ready?
     var maybeEditor = [self objectByEvaluatingJavaScriptFromString:"editor"];
-    if (maybeEditor)
+    if (maybeEditor && maybeEditor.ready)
     {
         [self setEditor:maybeEditor];
         if (loadTimer)
@@ -222,6 +222,12 @@ WKTextViewPaddingRight = 6;
 - (CPString)htmlValue
 {
     return [self editor].rawContent();
+}
+
+- (void)setHtmlValue:(CPString)html
+{
+    [self editor].setRawContent(html);
+    [self _didChange];
 }
 
 - (CPString)textValue
