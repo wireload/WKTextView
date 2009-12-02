@@ -1,27 +1,27 @@
 WyzihatKit
 ==========
 
-A [Cappuccino](http://cappuccino.org/) control providing rich text editing through use of the [WyziHat](http://github.com/josh/wysihat/) editor.
+A [Cappuccino](http://cappuccino.org/) control providing rich text editing through use of the [WysiHat](http://github.com/josh/wysihat/) editor.
 
 This is mostly a hack for use until a proper rich text capable CPTextView is introduced.
 
 ## Installation
 
-Link the `WyziHat` folder into your `Frameworks` folder. Then copy `Wyzihat/Resources/WKTextView` into `Resources/WKTextView`. 
+Link the `WyziHat` folder into your `Frameworks` folder. Then copy `Wysihat/Resources/WKTextView` into `Resources/WKTextView`. 
 
-Create and combine the `wyzihat.js` file using the WyzihatKit modified version of WyziHat:
+Create and combine the `wyzihat.js` file using the WyzihatKit modified version of WysiHat:
 
 	git submodule init
 	git submodule update
-	cd wyzihat
+	cd wysihat
 	git submodule init
 	git submodule update
 	rake
-	cat dist/prototype.js dist/wysihat.js >../Resources/WKTextView/wyzihat.js
+	cat dist/prototype.js dist/wysihat.js >../Resources/WKTextView/wysihat.js
 	
-Optionally minify the combined `wyzihat.js` - it will shrink very well.
+Optionally minify the combined `wysihat.js` - it will shrink very well.
 
-Copy your combined `wyzihat.js` into your deployment `Resources/WKTextView`.
+Copy your combined `wysihat.js` into your deployment `Resources/WKTextView`.
 
 ## Usage
 
@@ -33,14 +33,14 @@ The view needs to load resources such as `editor.html` and `wyzihat.js`. Wait fo
 
 ## Sample
 
-A sample program is provided in the `sample` folder. You can [view it online](http://hosting.wireload.net/wyzihat/) or compile it yourself. To compile, install `Frameworks` and `wyzihat.js`:
+A sample program is provided in the `sample` folder. You can [view it online](http://hosting.wireload.net/wyzihat/) or compile it yourself. To compile, install `Frameworks` and `wysihat.js`:
 	
 	cd sample
 	capp gen -f -l --force # Installs Cappuccino frameworks.
 	cd Frameworks
 	ln -s ../../ WyzihatKit
 	cd ..
-	cp <WYZIHAT_BUILD>/wyzihat.js Resources/WKTextView
+	cp <WYZIHAT_BUILD>/wysihat.js Resources/WKTextView
 
 Then open up `index-debug.html` in a browser.
 
