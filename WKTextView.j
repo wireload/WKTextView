@@ -137,6 +137,7 @@ WKTextViewDefaultFont = "Verdana";
 {
     // When the text changes, the height of the content may change.
     [self _resizeWebFrame];
+    [self _cursorDidMove];
     [self _updateScrollers];
 }
 
@@ -266,7 +267,7 @@ WKTextViewDefaultFont = "Verdana";
 - (@action)clearText:(id)sender
 {
     [self setHtmlValue:""];
-    [self _didChange];    
+    [self _didChange];
     [self _didPerformAction];
 }
 
