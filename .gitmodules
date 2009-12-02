@@ -1,0 +1,3 @@
+[submodule "wyzihat"]
+	path = wyzihat
+	url = git@github.com:aljungberg/wysihat.git
