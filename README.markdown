@@ -9,16 +9,19 @@ This is mostly a hack for use until a proper rich text capable CPTextView is int
 
 Link the `WyziHat` folder into your `Frameworks` folder. Then copy `Wyzihat/Resources/WKTextView` into `Resources/WKTextView`. 
 
-Create and combine the `wyzihat.js` file:
+Create and combine the `wyzihat.js` file using the WyzihatKit modified version of WyziHat:
 
-	git clone git://github.com/josh/wysihat.git
-	cd wysihat
-	rake
-	cat dist/prototype.js dist/wysihat.js >>wyzihat.js
+  git submodule init
+  git submodule update
+  cd wyzihat
+  git submodule init
+  git submodule update
+  rake
+	cat dist/prototype.js dist/wysihat.js >../Resources/WKTextView/wyzihat.js
 	
 Optionally minify the combined `wyzihat.js` - it will shrink very well.
 
-Copy your combined `wyzihat.js` into `Resources/WKTextView`.
+Copy your combined `wyzihat.js` into your deployment `Resources/WKTextView`.
 
 ## Usage
 
