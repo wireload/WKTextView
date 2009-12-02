@@ -33,7 +33,7 @@ The view needs to load resources such as `editor.html` and `wysihat.js`. Wait fo
 
 ## Sample
 
-A sample program is provided in the `sample` folder. You can [view it online](http://hosting.wireload.net/wyzihat/) or compile it yourself. To compile, install `Frameworks` and `wysihat.js`:
+A sample program is provided in the `sample` folder. You can [view it online](http://hosting.wireload.net/wysihat/) or compile it yourself. To compile, install `Frameworks` and `wysihat.js`:
 	
 	cd sample
 	capp gen -f -l --force # Installs Cappuccino frameworks.
