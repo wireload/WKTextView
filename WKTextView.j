@@ -11,6 +11,7 @@ WKTextViewPaddingBottom = 4;
 WKTextViewPaddingLeft = 6;
 WKTextViewPaddingRight = 6;
 WKTextCursorHeightFactor = 0.1;
+WKTextViewDefaultFont = "Verdana";
 
 /*!
     A WYSIHAT based rich text editor widget.
@@ -24,6 +25,7 @@ WKTextCursorHeightFactor = 0.1;
     JSObject    editor;
     BOOL        shouldFocusAfterAction;
     BOOL        suppressAutoFocus;
+    CPString    lastFont;
 }
 
 - (id)initWithFrame:(CGRect)aFrame
@@ -105,9 +107,13 @@ WKTextCursorHeightFactor = 0.1;
     editor.getDocument().body.style.margin = '0';
     // Without this line Safari may show an inner scrollbar.
     editor.getDocument().body.style.overflow = 'hidden';
+
+    // FIXME execCommand doesn't work well without the view having been focused
+    // on at least once.
+    editor.focus();
     
     suppressAutoFocus = YES;    
-    [self setFont:"Verdana"];
+    [self setFont:WKTextViewDefaultFont];
     suppressAutoFocus = NO;
     
     editor.observe("wysihat:change", function() {
@@ -361,19 +367,33 @@ WKTextCursorHeightFactor = 0.1;
 
 - (void)setFont:(CPString)font
 {
+    lastFont = font;
     [self editor].fontSelection(font);
     [self _didPerformAction];
 }
 
 - (CPString)font
 {
-    var fontName = [self editor].fontSelected();
-    // The font name may come through with quotes e.g. 'Apple Chancery'
-    var format = /'(.*?)'/,
-        r = fontName.match(new RegExp(format));
-    
-    if (r && r.length == 2)
-        return r[1];
+    // fontSelected crashes if the editor is not active, so just return the
+    // last seen font.
+    var node = editor.selection.getNode();
+    if (node)
+    {
+        var fontName = [self editor].fontSelected();
 
-    return fontName;
+        // The font name may come through with quotes e.g. 'Apple Chancery'
+        var format = /'(.*?)'/,
+            r = fontName.match(new RegExp(format));
+
+        if (r && r.length == 2) {
+            lastFont = r[1];
+        }
+        else if (fontName)
+        {
+            lastFont = fontName;
+        }
+        
+    }
+    
+    return lastFont;
 }
