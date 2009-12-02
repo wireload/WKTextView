@@ -10,6 +10,7 @@ WKTextViewPaddingTop = 4;
 WKTextViewPaddingBottom = 4;
 WKTextViewPaddingLeft = 6;
 WKTextViewPaddingRight = 6;
+WKTextCursorHeightFactor = 0.1;
 
 /*!
     A WYSIHAT based rich text editor widget.
@@ -135,18 +136,23 @@ WKTextViewPaddingRight = 6;
 
 - (void)_cursorDidMove
 {
+    // Kind of a hack to figure out the exact cursor position.
+    editor.getWindow().scrollTo(0, 0);
+    editor.selection.setBookmark();
+    bookmark = editor.getDocument().getElementById('bookmark');
+    if (bookmark)
+    {
+        var offset = bookmark.offsetTop,
+            cursorHeight = [_frameView bounds].size.height * WKTextCursorHeightFactor;      
+        bookmark.parentNode.removeChild(bookmark);
+        [_frameView scrollRectToVisible:CGRectMake(0,offset-cursorHeight,1,offset+cursorHeight)];
+        [self _updateScrollers];
+    }
+    
     if ([delegate respondsToSelector:@selector(textViewCursorDidMove:)])
     {
         [delegate textViewCursorDidMove:self];
-    }
-    
-/*    n = editor.selection.getNode();
-    
-    // If the cursor goes outside of the scrollview, try to center it.
-    if (n) {
-        [_frameView scrollRectToVisible:CGRectMake(n.offsetLeft,n.offsetTop,n.scrollWidth,n.scrollHeight)];
-        [self _updateScrollers];
-    }*/
+    }    
 }
 
 - (void)_updateScrollers
