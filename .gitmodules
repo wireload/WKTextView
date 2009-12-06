@@ -1,3 +1,3 @@
-[submodule "wyzihat"]
-	path = wyzihat
-	url = git@github.com:aljungberg/wysihat.git
+[submodule "wysihat"]
+	path = wysihat
+	url = git://github.com/aljungberg/wysihat.git
