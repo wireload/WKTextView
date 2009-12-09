@@ -121,6 +121,7 @@ var NewToolbarItemIdentifier = "NewToolbarItemIdentifier",
             [dropdown addItem:menuItem];
         }
 
+        [dropdown setTitle:@"Select Font..."];
         [toolbarItem setView:dropdown];
         [toolbarItem setLabel:"Font"];
     }

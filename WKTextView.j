@@ -145,12 +145,12 @@ WKTextViewDefaultFont = "Verdana";
 {
     // Kind of a hack to figure out the exact cursor position.
     editor.getWindow().scrollTo(0, 0);
-    editor.selection.setBookmark();
+    editor.selection.setBookmark();    
     bookmark = editor.getDocument().getElementById('bookmark');
     if (bookmark)
     {
         var offset = bookmark.offsetTop,
-            cursorHeight = [_frameView bounds].size.height * WKTextCursorHeightFactor;      
+            cursorHeight = [_frameView bounds].size.height * WKTextCursorHeightFactor;
         bookmark.parentNode.removeChild(bookmark);
         [_frameView scrollRectToVisible:CGRectMake(0,offset-cursorHeight,1,offset+cursorHeight)];
         [self _updateScrollers];
@@ -380,8 +380,8 @@ WKTextViewDefaultFont = "Verdana";
     var node = editor.selection.getNode();
     if (node)
     {
-        var fontName = [self editor].fontSelected();
-
+        var fontName = [self editor].getSelectedStyles().get('fontname');
+        
         // The font name may come through with quotes e.g. 'Apple Chancery'
         var format = /'(.*?)'/,
             r = fontName.match(new RegExp(format));
