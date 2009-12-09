@@ -10,7 +10,7 @@ WKTextViewPaddingTop = 4;
 WKTextViewPaddingBottom = 4;
 WKTextViewPaddingLeft = 6;
 WKTextViewPaddingRight = 6;
-WKTextCursorHeightFactor = 0.1;
+WKTextCursorHeightFactor = 0.2;
 WKTextViewDefaultFont = "Verdana";
 
 /*!
@@ -141,18 +141,48 @@ WKTextViewDefaultFont = "Verdana";
     [self _updateScrollers];
 }
 
++ (INT)_countCharacters: aNode
+{
+    if (aNode.nodeType == 3)
+    {
+        return aNode.length;
+    }
+    else
+    {
+        var r=0;
+        for (var c=aNode.firstChild; c != null; c = c.nextSibling)
+        {
+            r += [WKTextView _countCharacters:c];
+        }
+        return r;
+    }
+}
+
 - (void)_cursorDidMove
 {
-    // Kind of a hack to figure out the exact cursor position.
     editor.getWindow().scrollTo(0, 0);
-    editor.selection.setBookmark();    
-    bookmark = editor.getDocument().getElementById('bookmark');
-    if (bookmark)
+    /*
+        It's possible to get the exact cursor position by inserting a div with a known
+        id and gettings its offset before removing it again. Unfortunately this causes
+        a ton of bugs like selections being lost, text paragraphs being reflowed and 
+        spaces appearing and sticking in Opera. We use an estimate instead based on the
+        current span the cursor is in.
+    */
+    n = editor.selection.getNode();
+    if (n)
     {
-        var offset = bookmark.offsetTop,
-            cursorHeight = [_frameView bounds].size.height * WKTextCursorHeightFactor;
-        bookmark.parentNode.removeChild(bookmark);
-        [_frameView scrollRectToVisible:CGRectMake(0,offset-cursorHeight,1,offset+cursorHeight)];
+        var top = n.offsetTop,
+            height = n.offsetHeight,
+            cursorHeight = [self bounds].size.height * WKTextCursorHeightFactor,
+            position = editor.selection.getRange().startOffset,
+            characters = [WKTextView _countCharacters:n],
+            advance = 0;
+        
+        if (characters > 0)
+            advance = position / characters;
+                
+        var offset = FLOOR(top + advance * height);
+        [_frameView scrollRectToVisible:CGRectMake(0,offset-cursorHeight,1,2*cursorHeight)];
         [self _updateScrollers];
     }
     
