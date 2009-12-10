@@ -139,6 +139,12 @@ WKTextViewDefaultFont = "Verdana";
     [self _resizeWebFrame];
     [self _cursorDidMove];
     [self _updateScrollers];
+    
+    if ([delegate respondsToSelector:@selector(textViewDidChange:)])
+    {
+        [delegate textViewDidChange:self];
+    }    
+    
 }
 
 + (INT)_countCharacters: aNode
@@ -180,8 +186,14 @@ WKTextViewDefaultFont = "Verdana";
         
         if (characters > 0)
             advance = position / characters;
+        
+        //console.log("range.startOffset: "+editor.selection.getRange().startOffset+" range.endOffset: "+editor.selection.getRange().endOffset);
+        //console.log("top: "+top+" height:"+height+" position: "+position+" characters:"+ characters + " advance: "+advance);
                 
-        var offset = FLOOR(top + advance * height);
+        var offset = FLOOR(top + advance * height),
+            scrollTop = MAX(0, offset-cursorHeight),
+            scollHeight = 2*cursorHeight;
+        //console.log("scrollTop: "+scrollTop+"scrollHeight: "+scollHeight);
         [_frameView scrollRectToVisible:CGRectMake(0,offset-cursorHeight,1,2*cursorHeight)];
         [self _updateScrollers];
     }
