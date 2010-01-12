@@ -15,7 +15,7 @@ WKTextViewDefaultFont = "Verdana";
 
 /*!
     A WYSIHAT based rich text editor widget.
-    
+
     Beware of the load times. Wait for the load event.
 */
 @implementation WKTextView : CPWebView
@@ -65,9 +65,9 @@ WKTextViewDefaultFont = "Verdana";
         if (loadTimer)
         {
             [loadTimer invalidate];
-            loadTimer = nil;            
+            loadTimer = nil;
          }
-        
+
         if ([delegate respondsToSelector:@selector(textViewDidLoad:)])
         {
             [delegate textViewDidLoad:self];
@@ -76,7 +76,7 @@ WKTextViewDefaultFont = "Verdana";
     else
     {
         if (!loadTimer)
-            loadTimer = [CPTimer scheduledTimerWithTimeInterval:0.1 target:self selector:"checkLoad" userInfo:nil repeats:YES];        
+            loadTimer = [CPTimer scheduledTimerWithTimeInterval:0.1 target:self selector:"checkLoad" userInfo:nil repeats:YES];
     }
 }
 
@@ -108,14 +108,17 @@ WKTextViewDefaultFont = "Verdana";
     // Without this line Safari may show an inner scrollbar.
     editor.getDocument().body.style.overflow = 'hidden';
 
+    // Disable automatic resizing - we'll handle this manually in _resizeWebFrame.
+    [_frameView setAutoresizingMask:0];
+
     // FIXME execCommand doesn't work well without the view having been focused
     // on at least once.
     editor.focus();
-    
-    suppressAutoFocus = YES;    
+
+    suppressAutoFocus = YES;
     [self setFont:WKTextViewDefaultFont];
     suppressAutoFocus = NO;
-    
+
     editor.observe("wysihat:change", function() {
         [[CPRunLoop currentRunLoop] performSelector:"_didChange" target:self argument:nil order:0 modes:[CPDefaultRunLoopMode]];
         // The normal run loop doesn't react to iframe events, so force immediate processing.
@@ -139,12 +142,12 @@ WKTextViewDefaultFont = "Verdana";
     [self _resizeWebFrame];
     [self _cursorDidMove];
     [self _updateScrollers];
-    
+
     if ([delegate respondsToSelector:@selector(textViewDidChange:)])
     {
         [delegate textViewDidChange:self];
-    }    
-    
+    }
+
 }
 
 + (INT)_countCharacters: aNode
@@ -170,7 +173,7 @@ WKTextViewDefaultFont = "Verdana";
     /*
         It's possible to get the exact cursor position by inserting a div with a known
         id and gettings its offset before removing it again. Unfortunately this causes
-        a ton of bugs like selections being lost, text paragraphs being reflowed and 
+        a ton of bugs like selections being lost, text paragraphs being reflowed and
         spaces appearing and sticking in Opera. We use an estimate instead based on the
         current span the cursor is in.
     */
@@ -183,13 +186,13 @@ WKTextViewDefaultFont = "Verdana";
             position = editor.selection.getRange().startOffset,
             characters = [WKTextView _countCharacters:n],
             advance = 0;
-        
+
         if (characters > 0)
             advance = position / characters;
-        
+
         //console.log("range.startOffset: "+editor.selection.getRange().startOffset+" range.endOffset: "+editor.selection.getRange().endOffset);
         //console.log("top: "+top+" height:"+height+" position: "+position+" characters:"+ characters + " advance: "+advance);
-                
+
         var offset = FLOOR(top + advance * height),
             scrollTop = MAX(0, offset-cursorHeight),
             scollHeight = 2*cursorHeight;
@@ -197,46 +200,55 @@ WKTextViewDefaultFont = "Verdana";
         [_frameView scrollRectToVisible:CGRectMake(0,offset-cursorHeight,1,2*cursorHeight)];
         [self _updateScrollers];
     }
-    
+
     if ([delegate respondsToSelector:@selector(textViewCursorDidMove:)])
     {
         [delegate textViewCursorDidMove:self];
-    }    
+    }
 }
 
 - (void)_updateScrollers
 {
     [_scrollView setNeedsDisplay:YES];
 }
- 
+
 - (BOOL)_resizeWebFrame
 {
     // We override because we don't care about the content height of the iframe but
     // rather the content height of the editor's iframe.
-        
+
     // By default just match the iframe to available size.
     var width = [_scrollView bounds].size.width,
-        height = [_scrollView bounds].size.height,
-        hscroller = [_scrollView horizontalScroller],
+        desiredHeight = [self _setWidthAndCalculateHeight:width],
         vscroller = [_scrollView verticalScroller];
 
-    if (vscroller)
+    // If the desired height will result in a vertical scrollbar we
+    // have to do it over again with the scrollbar in mind.
+    if (desiredHeight > [_scrollView bounds].size.height)
         width -= [vscroller bounds].size.width;
-    if (hscroller)
-        height -= [hscroller bounds].size.height;
+
+    var height = [self _setWidthAndCalculateHeight:width];
+
+    _iframe.setAttribute("height", height);
+    [_frameView setFrameSize:CGSizeMake(width, height)];
+}
+
+- (int)_setWidthAndCalculateHeight: (int)width
+{
+    var height;
 
     _iframe.setAttribute("width", width);
-    
+
     if (_scrollMode == CPWebViewScrollAppKit && editor !== nil)
     {
         var editorBody = editor.getDocument().body;
-        
+
         // This needs to be before the height calculation so that the right height for the current
         // width can be calculated.
         editorBody.style.width = width-WKTextViewPaddingLeft-WKTextViewPaddingRight+"px";
-        
+
         // editoryBody.scrollHeight is normally correct, except it never becomes smaller once
-        // it's gone up. Since here in _resizeWebFrame we don't know if the content became taller 
+        // it's gone up. Since here in _resizeWebFrame we don't know if the content became taller
         // or shorter, we have to do it the hard way in both cases.
 
         // This method is based on the one implemented in Dojo's TextArea.
@@ -253,27 +265,24 @@ WKTextViewDefaultFont = "Verdana";
         // FIXME Immediately after content changes, Firefox calculates the height of the body
         // to 0 pixels. This code alleviates the symtoms by never making the scrolling area
         // smaller than the height available.
-        height = MAX(newHeight, height);
+        height = MAX(newHeight, [_scrollView bounds].size.height);
     }
 
-    //console.log("width: "+width+" height: "+height);
-    _iframe.setAttribute("height", height);
-
-    [_frameView setFrameSize:CGSizeMake(width, height)];
-} 
+    return height;
+}
 
 - (void)_loadMainFrameURL
 {
     // Exactly like super, minus
     // [self _setScrollMode:CPWebViewScrollNative];
     [self _startedLoading];
-    
+
     _ignoreLoadStart = YES;
     _ignoreLoadEnd = NO;
-    
+
     _url = _mainFrameURL;
     _html = null;
-    
+
     [self _load];
 }
 
@@ -294,9 +303,9 @@ WKTextViewDefaultFont = "Verdana";
 }
 
 - (void)setTextValue:(CPString)content
-{   
+{
     [self editor].setContent(content);
-    [self _didChange];    
+    [self _didChange];
 }
 
 - (void)_didPerformAction
@@ -316,7 +325,7 @@ WKTextViewDefaultFont = "Verdana";
 - (void)insertHtml:(CPString)html
 {
     [self editor].insertHTML(html);
-    [self _didChange];    
+    [self _didChange];
     [self _didPerformAction];
 }
 
@@ -423,7 +432,7 @@ WKTextViewDefaultFont = "Verdana";
     if (node)
     {
         var fontName = [self editor].getSelectedStyles().get('fontname');
-        
+
         // The font name may come through with quotes e.g. 'Apple Chancery'
         var format = /'(.*?)'/,
             r = fontName.match(new RegExp(format));
@@ -435,8 +444,8 @@ WKTextViewDefaultFont = "Verdana";
         {
             lastFont = fontName;
         }
-        
+
     }
-    
+
     return lastFont;
 }
