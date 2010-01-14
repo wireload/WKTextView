@@ -25,6 +25,7 @@ WKTextViewDefaultFont = "Verdana";
     JSObject    editor;
     BOOL        shouldFocusAfterAction;
     BOOL        suppressAutoFocus;
+    BOOL        editable;
     CPString    lastFont;
 }
 
@@ -38,6 +39,7 @@ WKTextViewDefaultFont = "Verdana";
         // Check if the document was loaded immediately. This could happen if we're loaded from
         // a file URL.
         [self checkLoad];
+        [self setEditable: YES];
     }
     return self;
 }
@@ -80,6 +82,39 @@ WKTextViewDefaultFont = "Verdana";
     }
 }
 
+- (BOOL)acceptsFirstResponder
+{
+    return (editor !== nil && [self isEditable]);
+}
+
+- (BOOL)becomeFirstResponder
+{
+    editor.focus();
+    return YES;
+}
+
+- (BOOL)resignFirstResponder
+{
+    window.focus();
+    return YES;
+}
+
+/*!
+    Sets whether or not the receiver text view can be edited
+*/
+- (void)setEditable:(BOOL)shouldBeEditable
+{
+    editable = shouldBeEditable;
+}
+
+/*!
+    Returns \c YES if the text view is currently editable by the user.
+*/
+- (BOOL)isEditable
+{
+    return editable;
+}
+
 /*!
     Sets whether the editor should automatically take focus after an action
     method is invoked such as boldSelection or setFont. This is useful when
@@ -99,6 +134,7 @@ WKTextViewDefaultFont = "Verdana";
 {
     if (editor === anEditor)
         return;
+
     editor = anEditor;
     editor.getDocument().body.style.paddingTop = WKTextViewPaddingTop+'px';
     editor.getDocument().body.style.paddingBottom = WKTextViewPaddingBottom+'px';
@@ -119,16 +155,47 @@ WKTextViewDefaultFont = "Verdana";
     [self setFont:WKTextViewDefaultFont];
     suppressAutoFocus = NO;
 
-    editor.observe("wysihat:change", function() {
-        [[CPRunLoop currentRunLoop] performSelector:"_didChange" target:self argument:nil order:0 modes:[CPDefaultRunLoopMode]];
-        // The normal run loop doesn't react to iframe events, so force immediate processing.
-        [[CPRunLoop currentRunLoop] limitDateForMode:CPDefaultRunLoopMode];
-    });
-    editor.observe("wysihat:cursormove", function() {
-        [[CPRunLoop currentRunLoop] performSelector:"_cursorDidMove" target:self argument:nil order:0 modes:[CPDefaultRunLoopMode]];
-        // The normal run loop doesn't react to iframe events, so force immediate processing.
-        [[CPRunLoop currentRunLoop] limitDateForMode:CPDefaultRunLoopMode];
-    });
+    if (editor['WKTextView_Installed'] === undefined)
+    {
+        defaultKeydown = editor.getDocument().onkeydown;
+        editor.getDocument().onkeydown = function(ev) {
+            var key = ev.keyCode;
+            if (!key)
+            {
+                key = ev.which;
+            }
+
+            // Shift+Tab
+            if (ev.shiftKey && key == 9)
+            {
+                setTimeout(function()
+                {
+                    [[self window] selectPreviousKeyView:self];
+                    [[CPRunLoop currentRunLoop] limitDateForMode:CPDefaultRunLoopMode];
+                }, 0.0);
+                return false;
+            }
+            else
+            {
+                if (defaultKeydown)
+                    return defaultKeydown(ev);
+                return true;
+            }
+        };
+
+        editor.observe("wysihat:change", function() {
+            [[CPRunLoop currentRunLoop] performSelector:"_didChange" target:self argument:nil order:0 modes:[CPDefaultRunLoopMode]];
+            // The normal run loop doesn't react to iframe events, so force immediate processing.
+            [[CPRunLoop currentRunLoop] limitDateForMode:CPDefaultRunLoopMode];
+        });
+        editor.observe("wysihat:cursormove", function() {
+            [[CPRunLoop currentRunLoop] performSelector:"_cursorDidMove" target:self argument:nil order:0 modes:[CPDefaultRunLoopMode]];
+            // The normal run loop doesn't react to iframe events, so force immediate processing.
+            [[CPRunLoop currentRunLoop] limitDateForMode:CPDefaultRunLoopMode];
+        });
+
+        editor['WKTextView_Installed'] = true;
+    }
 }
 
 - (JSObject)editor
