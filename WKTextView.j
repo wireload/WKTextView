@@ -157,6 +157,19 @@ WKTextViewDefaultFont = "Verdana";
 
     if (editor['WKTextView_Installed'] === undefined)
     {
+        editor.getWindow().onmousedown = function(ev) {
+            var becameFirst = false;
+            if ([self acceptsFirstResponder])
+            {
+                becameFirst = [[self window] makeFirstResponder:self];
+                if (becameFirst)
+                    [[CPRunLoop currentRunLoop] limitDateForMode:CPDefaultRunLoopMode];
+            }
+            // If selection was successful, allow the event to continue propagate so that the
+            // cursor is placed in the right spot.
+            return becameFirst;
+        }
+
         defaultKeydown = editor.getDocument().onkeydown;
         editor.getDocument().onkeydown = function(ev) {
             var key = ev.keyCode;
