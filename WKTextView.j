@@ -13,6 +13,23 @@ WKTextViewPaddingRight = 6;
 WKTextCursorHeightFactor = 0.2;
 WKTextViewDefaultFont = "Verdana";
 
+_CancelEvent = function(ev) {
+    if (!ev)
+        ev = window.event;
+    if (ev && ev.stopPropagation)
+        ev.stopPropagation();
+    else
+        ev.cancelBubble = true;
+}
+
+_EditorEvents = [
+    'onmousedown',
+    'onmouseup',
+    'onkeypress',
+    'onkeydown',
+    'onkeyup'
+]
+
 /*!
     A WYSIHAT based rich text editor widget.
 
@@ -26,20 +43,24 @@ WKTextViewDefaultFont = "Verdana";
     BOOL        shouldFocusAfterAction;
     BOOL        suppressAutoFocus;
     BOOL        editable;
+    BOOL        enabled;
     CPString    lastFont;
+    CPDictionary    eventHandlerSwizzler;
 }
 
 - (id)initWithFrame:(CGRect)aFrame
 {
     if (self = [super initWithFrame:aFrame])
     {
+        eventHandlerSwizzler = [[CPDictionary alloc] init];
         shouldFocusAfterAction = YES;
+        [self setEditable: YES];
+        [self setEnabled: YES];
         [self setScrollMode:CPWebViewScrollAppKit];
         [self setMainFrameURL:[[CPBundle mainBundle] pathForResource:"WKTextView/editor.html"]];
         // Check if the document was loaded immediately. This could happen if we're loaded from
         // a file URL.
         [self checkLoad];
-        [self setEditable: YES];
     }
     return self;
 }
@@ -60,7 +81,7 @@ WKTextViewDefaultFont = "Verdana";
 - (void)checkLoad
 {
     // Is the editor ready?
-    var maybeEditor = [self objectByEvaluatingJavaScriptFromString:"editor"];
+    var maybeEditor = [self objectByEvaluatingJavaScriptFromString:"typeof(editor) != 'undefined' ? editor : null"];
     if (maybeEditor && maybeEditor.ready)
     {
         [self setEditor:maybeEditor];
@@ -84,7 +105,7 @@ WKTextViewDefaultFont = "Verdana";
 
 - (BOOL)acceptsFirstResponder
 {
-    return (editor !== nil && [self isEditable]);
+    return (editor !== nil && [self isEditable] && [self isEnabled]);
 }
 
 - (BOOL)becomeFirstResponder
@@ -100,7 +121,7 @@ WKTextViewDefaultFont = "Verdana";
 }
 
 /*!
-    Sets whether or not the receiver text view can be edited
+    Sets whether or not the receiver text view can be edited.
 */
 - (void)setEditable:(BOOL)shouldBeEditable
 {
@@ -113,6 +134,40 @@ WKTextViewDefaultFont = "Verdana";
 - (BOOL)isEditable
 {
     return editable;
+}
+
+/*!
+    Sets whether or not the receiver text view is enabled.
+*/
+- (void)setEnabled:(BOOL)shouldBeEnabled
+{
+    enabled = shouldBeEnabled;
+    if (editor) {
+        editor.getDocument().designMode = enabled ? 'on' : 'off';
+        // When designMode is off we must disable wysihat event handlers
+        // or they'll cause errors e.g. if a user clicks a disabled WKTextView.
+        var t = editor.getDocument();
+        for(var i=0; i<_EditorEvents.length; i++) {
+            var ev = _EditorEvents[i];
+            if (!enabled && t[ev] !== _CancelEvent)
+            {
+                [eventHandlerSwizzler setObject:t[ev] forKey:ev];
+                t[ev] = _CancelEvent;
+            }
+            else if (enabled && t[ev] === _CancelEvent)
+            {
+                t[ev] = [eventHandlerSwizzler objectForKey:ev];
+            }
+        }
+    }
+}
+
+/*!
+    Returns \c YES if the text view is currently enabled.
+*/
+- (BOOL)isEnabled
+{
+    return enabled;
 }
 
 /*!
@@ -209,6 +264,8 @@ WKTextViewDefaultFont = "Verdana";
 
         editor['WKTextView_Installed'] = true;
     }
+
+    [self setEnabled:enabled];
 }
 
 - (JSObject)editor
