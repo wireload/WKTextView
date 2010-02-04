@@ -213,12 +213,18 @@ _EditorEvents = [
     if (editor['WKTextView_Installed'] === undefined)
     {
         editor.getWindow().onmousedown = function(ev) {
+            // We have to emulate select pieces of CPWindow's event handling
+            // here since the iframe bypasses the regular event handling.
             var becameFirst = false;
             if ([self acceptsFirstResponder])
             {
                 becameFirst = [[self window] makeFirstResponder:self];
                 if (becameFirst)
+                {
+                    if (![[self window] isKeyWindow])
+                        [[self window] makeKeyAndOrderFront:self];
                     [[CPRunLoop currentRunLoop] limitDateForMode:CPDefaultRunLoopMode];
+                }
             }
             // If selection was successful, allow the event to continue propagate so that the
             // cursor is placed in the right spot.
