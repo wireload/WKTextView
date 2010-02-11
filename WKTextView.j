@@ -191,10 +191,13 @@ _EditorEvents = [
         return;
 
     editor = anEditor;
+    editor.allowTransparency = true;
     editor.getDocument().body.style.paddingTop = WKTextViewPaddingTop+'px';
     editor.getDocument().body.style.paddingBottom = WKTextViewPaddingBottom+'px';
     editor.getDocument().body.style.paddingLeft = WKTextViewPaddingLeft+'px';
     editor.getDocument().body.style.paddingRight = WKTextViewPaddingRight+'px';
+    editor.getDocument().body.style.backgroundColor = 'transparent';
+
     editor.getDocument().body.style.margin = '0';
     // Without this line Safari may show an inner scrollbar.
     editor.getDocument().body.style.overflow = 'hidden';
