@@ -611,7 +611,7 @@ _EditorEvents = [
     return lastFont;
 }
 
-- (void)colorSelection:(CPColor)aColor
+- (void)setColorForSelection:(CPColor)aColor
 {
     
     [self editor].colorSelection([aColor hexString]);
