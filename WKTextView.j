@@ -323,7 +323,7 @@ _EditorEvents = [
         spaces appearing and sticking in Opera. We use an estimate instead based on the
         current span the cursor is in.
     */
-    n = editor.selection.getNode();
+    var n = editor.selection.getNode();
     if (n)
     {
         var top = n.offsetTop,
