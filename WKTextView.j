@@ -381,7 +381,7 @@ _EditorEvents = [
 
 - (int)_setWidthAndCalculateHeight: (int)width
 {
-    var height;
+    var height = [self bounds].size.height;
 
     _iframe.setAttribute("width", width);
 
