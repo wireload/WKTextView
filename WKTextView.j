@@ -432,6 +432,21 @@ _EditorEvents = [
     [self _load];
 }
 
+- (void)_addKeypressHandler:(Function)aFunction
+{
+    
+    if([self editor]){
+        var doc = [self editor].getDocument();
+        if(doc.addEventListener){
+            doc.addEventListener('keypress', aFunction, true);
+        } else if(doc.attachEvent) {
+            doc.attachEvent('onkeypress', 
+                            function() { aFunction([self editor].event) });
+            //This needs to be tested in IE. I have no idea if [self editor] will have an event
+        }
+    }
+}
+
 - (CPString)htmlValue
 {
     return [self editor].rawContent();
