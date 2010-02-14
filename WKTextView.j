@@ -610,3 +610,11 @@ _EditorEvents = [
 
     return lastFont;
 }
+
+- (void)colorSelection:(CPColor)aColor
+{
+    
+    [self editor].colorSelection([aColor hexString]);
+    [self _didPerformAction];
+
+}
