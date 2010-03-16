@@ -215,17 +215,24 @@ _EditorEvents = [
 
     if (editor['WKTextView_Installed'] === undefined)
     {
-        editor.getWindow().onmousedown = function(ev) {
+        var doc = editor.getDocument();
+
+        var onmousedown = function(ev) {
+            if (!ev)
+                ev = window.event;
+            var win = [self window];
+            if ([win firstResponder] === self)
+                return YES;
             // We have to emulate select pieces of CPWindow's event handling
             // here since the iframe bypasses the regular event handling.
             var becameFirst = false;
             if ([self acceptsFirstResponder])
             {
-                becameFirst = [[self window] makeFirstResponder:self];
+                becameFirst = [win makeFirstResponder:self];
                 if (becameFirst)
                 {
-                    if (![[self window] isKeyWindow])
-                        [[self window] makeKeyAndOrderFront:self];
+                    if (![win isKeyWindow])
+                        [win makeKeyAndOrderFront:self];
                     [[CPRunLoop currentRunLoop] limitDateForMode:CPDefaultRunLoopMode];
                 }
             }
@@ -235,12 +242,13 @@ _EditorEvents = [
         }
 
         defaultKeydown = editor.getDocument().onkeydown;
-        editor.getDocument().onkeydown = function(ev) {
+        var onkeydown = function(ev) {
+            if (!ev)
+                ev = window.event;
+
             var key = ev.keyCode;
             if (!key)
-            {
                 key = ev.which;
-            }
 
             // Shift+Tab
             if (ev.shiftKey && key == 9)
@@ -259,6 +267,17 @@ _EditorEvents = [
                 return true;
             }
         };
+
+        if (doc.addEventListener)
+        {
+            doc.addEventListener('mousedown', onmousedown, true);
+            doc.addEventListener('keydown', onkeydown, true);
+        }
+        else if(doc.attachEvent)
+        {
+            doc.attachEvent('onmousedown', onmousedown);
+            doc.attachEvent('onkeydown', onkeydown);
+        }
 
         editor.observe("wysihat:change", function() {
             [[CPRunLoop currentRunLoop] performSelector:"_didChange" target:self argument:nil order:0 modes:[CPDefaultRunLoopMode]];
@@ -434,13 +453,13 @@ _EditorEvents = [
 
 - (void)_addKeypressHandler:(Function)aFunction
 {
-    
+
     if([self editor]){
         var doc = [self editor].getDocument();
         if(doc.addEventListener){
             doc.addEventListener('keypress', aFunction, true);
         } else if(doc.attachEvent) {
-            doc.attachEvent('onkeypress', 
+            doc.attachEvent('onkeypress',
                             function() { aFunction([self editor].event) });
             //This needs to be tested in IE. I have no idea if [self editor] will have an event
         }
@@ -613,7 +632,7 @@ _EditorEvents = [
 
 - (void)setColorForSelection:(CPColor)aColor
 {
-    
+
     [self editor].colorSelection([aColor hexString]);
     [self _didPerformAction];
 
