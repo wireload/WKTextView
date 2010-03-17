@@ -131,7 +131,7 @@ var NewToolbarItemIdentifier = "NewToolbarItemIdentifier",
 
 - (void)doFont:button {
     var fontName = [button titleOfSelectedItem];
-    [editorView setFont:fontName];
+    [editorView setFontNameForSelection:fontName];
 }
 
 - (@action)doLink:sender

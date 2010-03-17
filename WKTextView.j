@@ -210,7 +210,7 @@ _EditorEvents = [
     editor.focus();
 
     suppressAutoFocus = YES;
-    [self setFont:WKTextViewDefaultFont];
+    [self setFontNameForSelection:WKTextViewDefaultFont];
     suppressAutoFocus = NO;
 
     if (editor['WKTextView_Installed'] === undefined)
@@ -597,10 +597,16 @@ _EditorEvents = [
     [self _didPerformAction];
 }
 
-- (void)setFont:(CPString)font
+- (void)setFontNameForSelection:(CPString)font
 {
     lastFont = font;
     [self editor].fontSelection(font);
+    [self _didPerformAction];
+}
+
+- (void)setFontSizeForSelection:(float)size
+{
+    [self editor].fontSizeSelection(size);
     [self _didPerformAction];
 }
 
@@ -632,8 +638,6 @@ _EditorEvents = [
 
 - (void)setColorForSelection:(CPColor)aColor
 {
-
     [self editor].colorSelection([aColor hexString]);
     [self _didPerformAction];
-
 }
