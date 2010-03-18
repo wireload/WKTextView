@@ -6,10 +6,6 @@
  *
  */
 
-WKTextViewPaddingTop = 4;
-WKTextViewPaddingBottom = 4;
-WKTextViewPaddingLeft = 6;
-WKTextViewPaddingRight = 6;
 WKTextCursorHeightFactor = 0.2;
 WKTextViewDefaultFont = "Verdana";
 
@@ -82,7 +78,7 @@ _EditorEvents = [
 {
     // Is the editor ready?
     var maybeEditor = [self objectByEvaluatingJavaScriptFromString:"typeof(editor) != 'undefined' ? editor : null"];
-    if (maybeEditor && maybeEditor.ready)
+    if (maybeEditor)
     {
         [self setEditor:maybeEditor];
         if (loadTimer)
@@ -143,10 +139,10 @@ _EditorEvents = [
 {
     enabled = shouldBeEnabled;
     if (editor) {
-        editor.getDocument().designMode = enabled ? 'on' : 'off';
+        editor.contentEditable = enabled ? 'true' : 'false';
         // When designMode is off we must disable wysihat event handlers
         // or they'll cause errors e.g. if a user clicks a disabled WKTextView.
-        var t = editor.getDocument();
+        var t = editor;
         for(var i=0; i<_EditorEvents.length; i++) {
             var ev = _EditorEvents[i];
             if (!enabled && t[ev] !== _CancelEvent)
@@ -191,23 +187,20 @@ _EditorEvents = [
         return;
 
     editor = anEditor;
-    editor.allowTransparency = true;
-    editor.getDocument().body.style.paddingTop = WKTextViewPaddingTop+'px';
-    editor.getDocument().body.style.paddingBottom = WKTextViewPaddingBottom+'px';
-    editor.getDocument().body.style.paddingLeft = WKTextViewPaddingLeft+'px';
-    editor.getDocument().body.style.paddingRight = WKTextViewPaddingRight+'px';
-    editor.getDocument().body.style.backgroundColor = 'transparent';
+    _iframe.allowTransparency = true;
+    [self DOMWindow].document.body.style.padding = '0';
+    [self DOMWindow].document.body.style.backgroundColor = 'transparent';
 
-    editor.getDocument().body.style.margin = '0';
+    [self DOMWindow].document.body.style.margin = '0';
     // Without this line Safari may show an inner scrollbar.
-    editor.getDocument().body.style.overflow = 'hidden';
+    [self DOMWindow].document.body.style.overflow = 'hidden';
 
     // Disable automatic resizing - we'll handle this manually in _resizeWebFrame.
     [_frameView setAutoresizingMask:0];
 
     // FIXME execCommand doesn't work well without the view having been focused
     // on at least once.
-    editor.focus();
+    // editor.focus();
 
     suppressAutoFocus = YES;
     [self setFontNameForSelection:WKTextViewDefaultFont];
@@ -215,7 +208,7 @@ _EditorEvents = [
 
     if (editor['WKTextView_Installed'] === undefined)
     {
-        var doc = editor.getDocument();
+        var doc = [self DOMWindow].document;
 
         var onmousedown = function(ev) {
             if (!ev)
@@ -241,7 +234,7 @@ _EditorEvents = [
             return becameFirst;
         }
 
-        defaultKeydown = editor.getDocument().onkeydown;
+        defaultKeydown = doc.onkeydown;
         var onkeydown = function(ev) {
             if (!ev)
                 ev = window.event;
@@ -279,12 +272,12 @@ _EditorEvents = [
             doc.attachEvent('onkeydown', onkeydown);
         }
 
-        editor.observe("wysihat:change", function() {
+        editor.observe("field:change", function() {
             [[CPRunLoop currentRunLoop] performSelector:"_didChange" target:self argument:nil order:0 modes:[CPDefaultRunLoopMode]];
             // The normal run loop doesn't react to iframe events, so force immediate processing.
             [[CPRunLoop currentRunLoop] limitDateForMode:CPDefaultRunLoopMode];
         });
-        editor.observe("wysihat:cursormove", function() {
+        editor.observe("selection:change", function() {
             [[CPRunLoop currentRunLoop] performSelector:"_cursorDidMove" target:self argument:nil order:0 modes:[CPDefaultRunLoopMode]];
             // The normal run loop doesn't react to iframe events, so force immediate processing.
             [[CPRunLoop currentRunLoop] limitDateForMode:CPDefaultRunLoopMode];
@@ -292,6 +285,10 @@ _EditorEvents = [
 
         editor['WKTextView_Installed'] = true;
     }
+
+    [self _resizeWebFrame];
+    [self _cursorDidMove];
+    [self _updateScrollers];
 
     [self setEnabled:enabled];
 }
@@ -334,7 +331,7 @@ _EditorEvents = [
 
 - (void)_cursorDidMove
 {
-    editor.getWindow().scrollTo(0, 0);
+    //[self DOMWindow].scrollTo(0, 0);
     /*
         It's possible to get the exact cursor position by inserting a div with a known
         id and gettings its offset before removing it again. Unfortunately this causes
@@ -342,13 +339,14 @@ _EditorEvents = [
         spaces appearing and sticking in Opera. We use an estimate instead based on the
         current span the cursor is in.
     */
-    var n = editor.selection.getNode();
+    var selection = [self DOMWindow].getSelection(),
+        n = selection.getNode();
     if (n)
     {
         var top = n.offsetTop,
             height = n.offsetHeight,
             cursorHeight = [self bounds].size.height * WKTextCursorHeightFactor,
-            position = editor.selection.getRange().startOffset,
+            position = selection.getRangeAt(0).startOffset,
             characters = [WKTextView _countCharacters:n],
             advance = 0;
 
@@ -394,46 +392,38 @@ _EditorEvents = [
 
     var height = [self _setWidthAndCalculateHeight:width];
 
+    // Never make the iframe any shorter than the total available height.
+    height = MAX([self bounds].size.height, height);
     _iframe.setAttribute("height", height);
     [_frameView setFrameSize:CGSizeMake(width, height)];
 }
 
 - (int)_setWidthAndCalculateHeight: (int)width
 {
-    var height = [self bounds].size.height;
+    var height = [self bounds].size.height,
+        naturalHeight = height;
 
     _iframe.setAttribute("width", width);
 
     if (_scrollMode == CPWebViewScrollAppKit && editor !== nil)
     {
-        var editorBody = editor.getDocument().body;
+        var body = [self DOMWindow].document.body;
 
         // This needs to be before the height calculation so that the right height for the current
         // width can be calculated.
-        editorBody.style.width = width-WKTextViewPaddingLeft-WKTextViewPaddingRight+"px";
+        body.style.width = width+"px";
 
-        // editoryBody.scrollHeight is normally correct, except it never becomes smaller once
-        // it's gone up. Since here in _resizeWebFrame we don't know if the content became taller
-        // or shorter, we have to do it the hard way in both cases.
+        // By default we keep the content div one view height taller than its natural content. This
+        // has two advantages: the text doesn't momentarily scroll up when you enter a new row until
+        // we have adjusted the size, and you can click anywhere to edit.
 
-        // This method is based on the one implemented in Dojo's TextArea.
-        var apparentHeight = editorBody.scrollHeight;
-        // If the content isn't truly apparentHeight tall, extra padding will be absorbed into
-        // the 'fluff' space. By checking how much padding is absorbed we know the fluff size.
-        editorBody.style.paddingBottom = (WKTextViewPaddingBottom + apparentHeight) + "px";
-        editorBody.scrollTop = 0;
-        var newHeight = editorBody.scrollHeight - apparentHeight;
-        //var fluff = apparentHeight - newHeight;
-        //console.log("fluff: "+fluff);
-        editorBody.style.paddingBottom = WKTextViewPaddingBottom + "px";
-
-        // FIXME Immediately after content changes, Firefox calculates the height of the body
-        // to 0 pixels. This code alleviates the symtoms by never making the scrolling area
-        // smaller than the height available.
-        height = MAX(newHeight, [_scrollView bounds].size.height);
+        editor.style.height = 'auto';
+        naturalHeight = editor.scrollHeight;
+        editor.style.height = naturalHeight+height+'px';
+        console.log("height: "+naturalHeight);
     }
 
-    return height;
+    return naturalHeight;
 }
 
 - (void)_loadMainFrameURL
@@ -455,10 +445,13 @@ _EditorEvents = [
 {
 
     if([self editor]){
-        var doc = [self editor].getDocument();
-        if(doc.addEventListener){
+        var doc = [self DOMWindow].document;
+        if (doc.addEventListener)
+        {
             doc.addEventListener('keypress', aFunction, true);
-        } else if(doc.attachEvent) {
+        }
+        else if (doc.attachEvent)
+        {
             doc.attachEvent('onkeypress',
                             function() { aFunction([self editor].event) });
             //This needs to be tested in IE. I have no idea if [self editor] will have an event
@@ -468,12 +461,12 @@ _EditorEvents = [
 
 - (CPString)htmlValue
 {
-    return [self editor].rawContent();
+    return [self editor].innerHTML;
 }
 
 - (void)setHtmlValue:(CPString)html
 {
-    [self editor].setRawContent(html);
+    [self editor].innerHTML = html;
     [self _didChange];
 }
 
@@ -491,7 +484,7 @@ _EditorEvents = [
 - (void)_didPerformAction
 {
     if (shouldFocusAfterAction && !suppressAutoFocus) {
-        [self editor].focus();
+        [self DOMWindow].focus();
     }
 }
 
@@ -614,7 +607,7 @@ _EditorEvents = [
 {
     // fontSelected crashes if the editor is not active, so just return the
     // last seen font.
-    var node = editor.selection.getNode();
+    var node = editor.selection ? editor.selection.getNode() : null;
     if (node)
     {
         var fontName = [self editor].getSelectedStyles().get('fontname');
