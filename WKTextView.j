@@ -428,7 +428,7 @@ _EditorEvents = [
         editor.style.height = 'auto';
         naturalHeight = editor.scrollHeight;
         editor.style.height = naturalHeight+height+'px';
-        console.log("height: "+naturalHeight);
+        //console.log("height: "+naturalHeight);
     }
 
     return naturalHeight;
