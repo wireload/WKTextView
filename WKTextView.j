@@ -185,6 +185,9 @@ _EditorEvents = [
 {
     if (editor === anEditor)
         return;
+    
+    if (![self DOMWindow])
+        return;
 
     editor = anEditor;
     _iframe.allowTransparency = true;
@@ -341,6 +344,9 @@ _EditorEvents = [
         spaces appearing and sticking in Opera. We use an estimate instead based on the
         current span the cursor is in.
     */
+    if(![self DOMWindow])
+        return;
+
     var selection = [self DOMWindow].getSelection(),
         n = selection.getNode();
     if (n)
@@ -407,7 +413,7 @@ _EditorEvents = [
 
     _iframe.setAttribute("width", width);
 
-    if (_scrollMode == CPWebViewScrollAppKit && editor !== nil)
+    if (_scrollMode == CPWebViewScrollAppKit && editor !== nil && [self DOMWindow])
     {
         var body = [self DOMWindow].document.body;
 
