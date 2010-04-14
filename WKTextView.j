@@ -188,6 +188,8 @@ _EditorEvents = [
 
     editor = anEditor;
     _iframe.allowTransparency = true;
+    _iframe.scrolling = "no";
+
     [self DOMWindow].document.body.style.padding = '0';
     [self DOMWindow].document.body.style.backgroundColor = 'transparent';
 
@@ -597,7 +599,11 @@ _EditorEvents = [
     [self _didPerformAction];
 }
 
-- (void)setFontSizeForSelection:(float)size
+/*!
+    Set the font size for the selected text. Size is specified
+    as a number between 1-6 which corresponds to small through xx-large.
+*/
+- (void)setFontSizeForSelection:(int)size
 {
     [self editor].fontSizeSelection(size);
     [self _didPerformAction];
