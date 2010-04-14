@@ -77,7 +77,7 @@ _EditorEvents = [
 - (void)checkLoad
 {
     // Is the editor ready?
-    var maybeEditor = [self objectByEvaluatingJavaScriptFromString:"typeof(editor) != 'undefined' ? editor : null"];
+    var maybeEditor = [self objectByEvaluatingJavaScriptFromString:"typeof(__wysihat_editor) != 'undefined' ? __wysihat_editor : null"];
     if (maybeEditor)
     {
         [self setEditor:maybeEditor];
