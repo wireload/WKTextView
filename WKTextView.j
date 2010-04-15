@@ -77,7 +77,7 @@ _EditorEvents = [
 - (void)checkLoad
 {
     // Is the editor ready?
-    var maybeEditor = [self objectByEvaluatingJavaScriptFromString:"typeof(editor) != 'undefined' ? editor : null"];
+    var maybeEditor = [self objectByEvaluatingJavaScriptFromString:"typeof(__wysihat_editor) != 'undefined' ? __wysihat_editor : null"];
     if (maybeEditor)
     {
         [self setEditor:maybeEditor];
@@ -184,6 +184,9 @@ _EditorEvents = [
 - (void)setEditor:anEditor
 {
     if (editor === anEditor)
+        return;
+    
+    if (![self DOMWindow])
         return;
 
     editor = anEditor;
@@ -341,6 +344,9 @@ _EditorEvents = [
         spaces appearing and sticking in Opera. We use an estimate instead based on the
         current span the cursor is in.
     */
+    if(![self DOMWindow])
+        return;
+
     var selection = [self DOMWindow].getSelection(),
         n = selection.getNode();
     if (n)
@@ -407,7 +413,7 @@ _EditorEvents = [
 
     _iframe.setAttribute("width", width);
 
-    if (_scrollMode == CPWebViewScrollAppKit && editor !== nil)
+    if (_scrollMode == CPWebViewScrollAppKit && editor !== nil && [self DOMWindow])
     {
         var body = [self DOMWindow].document.body;
 
@@ -422,7 +428,7 @@ _EditorEvents = [
         editor.style.height = 'auto';
         naturalHeight = editor.scrollHeight;
         editor.style.height = naturalHeight+height+'px';
-        console.log("height: "+naturalHeight);
+        //console.log("height: "+naturalHeight);
     }
 
     return naturalHeight;
