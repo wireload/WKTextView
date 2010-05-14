@@ -1,6 +1,28 @@
 WyzihatKit Changelog
 ====================
 
+# Version 0.4 (May 1th, 2010)
+
+## New Features
+* Upgraded WysiHat. This version ups the minimum requirements to IE 7, Firefox 3, Safari 4 or Chrome 4. WyzihatKit was updated to use WysiHat as a contentEditable div instead of an iframe.
+* Implemented setEnabled/isEnabled. When disabled the editor does not display a text edit cursor; it does not listen to mouse events, etc.
+* Support for editor padding was removed since it too was a source of jumping bugs, although on a smaller scale. If you need padding just add it around the editor instead.
+* Jakefile to create debug and release builds (`jake debug` and `jake release`).
+* setFontSizeForSelection.
+* setColorForSelection.
+
+## Changes and Fixes
+* WKTextView can now become the first responder. Tabbing out of the field is possible with Shift-Tab, the standard key for tabbing backwards. Tab forward is not possible to allow the tab character to be written.
+* Fixed: clicking on a WKTextView would cause it to gain focus without requesting first responder status. The most visible artifact of this was that tabbing out of the view if it was activated by mouse didn't work as expected because Cappuccino didn't know the view was selected to begin with.
+* Activating an editor by clicking on it now makes its window the key window.
+* Backgrounds underneath WKTextView now shine through.
+* Fixed: some variables leaking into the global scope.
+* Fixed: uninitialized height could cause a race condition in Webkit.
+* Fixed: in Firefox, clicking on the WKTextView did not make it the first responder, and shift tab did not back tab out of the editor.
+* Renamed setFont to setFontNameForSelection.
+* Content height calculations are much improved and it looks like most of the jumping bugs (hitting enter to insert a new row while at the last row in a text taller than the view height) are resolved. Performance might also be improved.
+* Removed some left over logging.
+
 # Version 0.3 (January 13th, 2010)
 
 ## New Features
