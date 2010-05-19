@@ -185,7 +185,7 @@ _EditorEvents = [
 {
     if (editor === anEditor)
         return;
-    
+
     if (![self DOMWindow])
         return;
 
@@ -336,7 +336,6 @@ _EditorEvents = [
 
 - (void)_cursorDidMove
 {
-    //[self DOMWindow].scrollTo(0, 0);
     /*
         It's possible to get the exact cursor position by inserting a div with a known
         id and gettings its offset before removing it again. Unfortunately this causes
@@ -348,7 +347,7 @@ _EditorEvents = [
         return;
 
     var selection = [self DOMWindow].getSelection(),
-        n = selection.getNode();
+        n = selection != null ? selection.getNode() : null;
     if (n)
     {
         var top = n.offsetTop,
@@ -367,6 +366,7 @@ _EditorEvents = [
         var offset = FLOOR(top + advance * height),
             scrollTop = MAX(0, offset-cursorHeight),
             scollHeight = 2*cursorHeight;
+
         //console.log("scrollTop: "+scrollTop+"scrollHeight: "+scollHeight);
         [_frameView scrollRectToVisible:CGRectMake(0,offset-cursorHeight,1,2*cursorHeight)];
         [self _updateScrollers];
