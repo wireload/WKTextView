@@ -140,7 +140,7 @@ _EditorEvents = [
     enabled = shouldBeEnabled;
     if (editor) {
         editor.contentEditable = enabled ? 'true' : 'false';
-        // When designMode is off we must disable wysihat event handlers
+        // When contentEditable is off we must disable wysihat event handlers
         // or they'll cause errors e.g. if a user clicks a disabled WKTextView.
         var t = editor;
         for(var i=0; i<_EditorEvents.length; i++) {
