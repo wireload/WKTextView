@@ -42,6 +42,8 @@ _EditorEvents = [
     BOOL            editable;
     BOOL            enabled;
     CPString        lastFont;
+    CPString        lastColorString;
+    CPColor         lastColor;
     CPDictionary    eventHandlerSwizzler;
 
     CPScroller      _verticalScroller;
@@ -54,6 +56,8 @@ _EditorEvents = [
 {
     if (self = [super initWithFrame:aFrame])
     {
+        lastColor = [CPColor blackColor];
+
         _verticalPageScroll = 10;
         _verticalLineScroll = 10;
 
@@ -281,7 +285,7 @@ _EditorEvents = [
             if (!ev)
                 ev = window.event;
 
-            [[CPRunLoop currentRunLoop] performSelector:"_updateScrollbar" target:self argument:nil order:0 modes:[CPDefaultRunLoopMode]];
+            [self _updateScrollbar];
             [[CPRunLoop currentRunLoop] limitDateForMode:CPDefaultRunLoopMode];
             return true;
         }
@@ -305,7 +309,7 @@ _EditorEvents = [
             [[CPRunLoop currentRunLoop] limitDateForMode:CPDefaultRunLoopMode];
         });
         editor.observe("selection:change", function() {
-            [[CPRunLoop currentRunLoop] performSelector:"_cursorDidMove" target:self argument:nil order:0 modes:[CPDefaultRunLoopMode]];
+            [self _cursorDidMove];
             // The normal run loop doesn't react to iframe events, so force immediate processing.
             [[CPRunLoop currentRunLoop] limitDateForMode:CPDefaultRunLoopMode];
         });
@@ -576,6 +580,28 @@ _EditorEvents = [
     [self _didPerformAction];
 }
 
+- (int)fontSizeRaw
+{
+    try {
+        return [self DOMWindow].document.queryCommandValue('fontsize');
+    } catch(e) {
+        return "16px";
+    }
+}
+
+- (int)fontSize
+{
+    // Strangely we get font sizes back in pixels.
+    var size = parseInt([self fontSizeRaw]),
+        sizeMap = { 10:1, 13:2, 16:3, 18:4, 24:5, 32:6, 48:7};
+    if (size <= 7)
+        return size;
+    else if (size in sizeMap)
+        return sizeMap[size];
+    else
+        return 3;
+}
+
 /*!
     Set the font size for the selected text. Size is specified
     as a number between 1-6 which corresponds to small through xx-large.
@@ -588,28 +614,42 @@ _EditorEvents = [
 
 - (CPString)font
 {
-    // fontSelected crashes if the editor is not active, so just return the
-    // last seen font.
-    var node = editor.selection ? editor.selection.getNode() : null;
-    if (node)
+    try {
+        var fontName = [self DOMWindow].document.queryCommandValue('fontname');
+    } catch(e) {
+        return lastFont;
+    }
+
+    // The font name may come through with quotes e.g. 'Apple Chancery'
+    var format = /'(.*?)'/,
+        r = fontName.match(new RegExp(format));
+
+    if (r && r.length == 2) {
+        lastFont = r[1];
+    }
+    else if (fontName)
     {
-        var fontName = [self editor].getSelectedStyles().get('fontname');
-
-        // The font name may come through with quotes e.g. 'Apple Chancery'
-        var format = /'(.*?)'/,
-            r = fontName.match(new RegExp(format));
-
-        if (r && r.length == 2) {
-            lastFont = r[1];
-        }
-        else if (fontName)
-        {
-            lastFont = fontName;
-        }
-
+        lastFont = fontName;
     }
 
     return lastFont;
+}
+
+- (CPColor)color
+{
+    var colorString;
+    try {
+        colorString = [self DOMWindow].document.queryCommandValue('forecolor');
+    } catch(e) {
+        console.error(e);
+    }
+    // Avoid creating a new Color instance every time the cursor moves by reusing the last
+    // instance.
+    if (!colorString || colorString == lastColorString)
+        return lastColor;
+    lastColor = [[CPColor alloc] _initWithCSSString:colorString];
+    lastColorString = colorString;
+    return lastColor;
 }
 
 - (void)setColorForSelection:(CPColor)aColor
