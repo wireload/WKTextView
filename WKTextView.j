@@ -7,6 +7,7 @@
  */
 
 WKTextCursorHeightFactor = 0.2;
+WKTextViewInnerPadding = 4;
 WKTextViewDefaultFont = "Verdana";
 
 _CancelEvent = function(ev) {
@@ -317,7 +318,7 @@ _EditorEvents = [
         editor['WKTextView_Installed'] = true;
     }
 
-    [self _updateScrollbar];
+    [self _resizeWebFrame];
 
     [self setEnabled:enabled];
 }
@@ -415,6 +416,8 @@ _EditorEvents = [
 
 - (void)_resizeWebFrame
 {
+    if (editor)
+        editor.style.minHeight = (CGRectGetHeight([self bounds])-(2+WKTextViewInnerPadding*2)) + "px";
     [self _updateScrollbar];
 }
 
@@ -631,7 +634,7 @@ _EditorEvents = [
 
     // The font name may come through with quotes e.g. 'Apple Chancery'
     var format = /'(.*?)'/,
-        r = fontName.match(new RegExp(format));
+        r = fontName ? fontName.match(new RegExp(format)) : nil;
 
     if (r && r.length == 2) {
         lastFont = r[1];
