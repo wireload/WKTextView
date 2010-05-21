@@ -10,13 +10,24 @@
       padding: 0;
       border: 0;
       outline: none;
+      width: 100%;
+      height: 100%;
+    }
+
+    html,body {
       overflow: hidden;
     }
 
-    html, body {
-      margin: 4px;
-      padding: 0;
+    #scrolldiv {
       width: 100%;
+      height: 100%;
+      padding-right: 12px;
+      overflow-x: hidden;
+      overflow-y: scroll;
+    }
+
+    #padder {
+      padding: 4px;
     }
 
     textarea {
@@ -34,8 +45,11 @@
       $('loading').hide();
     });
   </script>
-
   <p id="loading">Loading editor...</p>
-  <textarea id="textarea"></textarea>
+  <div id="scrolldiv">
+    <div id="padder">
+      <textarea id="textarea"></textarea>
+    </div>
+  </div>
 </body>
 </html>

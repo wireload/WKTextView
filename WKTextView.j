@@ -33,27 +33,45 @@ _EditorEvents = [
 */
 @implementation WKTextView : CPWebView
 {
-    id          delegate @accessors;
-    CPTimer     loadTimer;
-    JSObject    editor;
-    BOOL        shouldFocusAfterAction;
-    BOOL        suppressAutoFocus;
-    BOOL        editable;
-    BOOL        enabled;
-    CPString    lastFont;
+    id              delegate @accessors;
+    CPTimer         loadTimer;
+    Object          editor;
+    Object          _scrollDiv;
+    BOOL            shouldFocusAfterAction;
+    BOOL            suppressAutoFocus;
+    BOOL            editable;
+    BOOL            enabled;
+    CPString        lastFont;
     CPDictionary    eventHandlerSwizzler;
+
+    CPScroller      _verticalScroller;
+    float           _verticalLineScroll;
+    float           _verticalPageScroll;
+
 }
 
 - (id)initWithFrame:(CGRect)aFrame
 {
     if (self = [super initWithFrame:aFrame])
     {
+        _verticalPageScroll = 10;
+        _verticalLineScroll = 10;
+
         eventHandlerSwizzler = [[CPDictionary alloc] init];
         shouldFocusAfterAction = YES;
         [self setEditable: YES];
         [self setEnabled: YES];
-        [self setScrollMode:CPWebViewScrollAppKit];
+        [self setScrollMode:CPWebViewScrollNative];
         [self setMainFrameURL:[[CPBundle mainBundle] pathForResource:"WKTextView/editor.html"]];
+
+        _verticalScroller = [[CPScroller alloc] initWithFrame:CGRectMake(0.0, 0.0, [CPScroller scrollerWidth], MAX(CGRectGetHeight([self bounds]), [CPScroller scrollerWidth]+1))];
+        [_verticalScroller setAutoresizingMask:CPViewHeightSizable | CPViewMinXMargin];
+        [_verticalScroller setTarget:self];
+        [_verticalScroller setAction:@selector(_verticalScrollerDidScroll:)];
+
+        [self addSubview:_verticalScroller];
+        [self _updateScrollbar];
+
         // Check if the document was loaded immediately. This could happen if we're loaded from
         // a file URL.
         [self checkLoad];
@@ -78,9 +96,10 @@ _EditorEvents = [
 {
     // Is the editor ready?
     var maybeEditor = [self objectByEvaluatingJavaScriptFromString:"typeof(__wysihat_editor) != 'undefined' ? __wysihat_editor : null"];
-    if (maybeEditor)
+    if (maybeEditor && maybeEditor.parentNode && maybeEditor.parentNode.parentNode)
     {
         [self setEditor:maybeEditor];
+
         if (loadTimer)
         {
             [loadTimer invalidate];
@@ -190,18 +209,10 @@ _EditorEvents = [
         return;
 
     editor = anEditor;
+    _scrollDiv = editor.parentNode.parentNode;
     _iframe.allowTransparency = true;
-    _iframe.scrolling = "no";
 
-    [self DOMWindow].document.body.style.padding = '0';
     [self DOMWindow].document.body.style.backgroundColor = 'transparent';
-
-    [self DOMWindow].document.body.style.margin = '0';
-    // Without this line Safari may show an inner scrollbar.
-    [self DOMWindow].document.body.style.overflow = 'hidden';
-
-    // Disable automatic resizing - we'll handle this manually in _resizeWebFrame.
-    [_frameView setAutoresizingMask:0];
 
     // FIXME execCommand doesn't work well without the view having been focused
     // on at least once.
@@ -266,15 +277,26 @@ _EditorEvents = [
             }
         };
 
+        var onscroll = function(ev) {
+            if (!ev)
+                ev = window.event;
+
+            [[CPRunLoop currentRunLoop] performSelector:"_updateScrollbar" target:self argument:nil order:0 modes:[CPDefaultRunLoopMode]];
+            [[CPRunLoop currentRunLoop] limitDateForMode:CPDefaultRunLoopMode];
+            return true;
+        }
+
         if (doc.addEventListener)
         {
             doc.addEventListener('mousedown', onmousedown, true);
             doc.addEventListener('keydown', onkeydown, true);
+            doc.body.addEventListener('scroll', onscroll, true);
         }
         else if(doc.attachEvent)
         {
             doc.attachEvent('onmousedown', onmousedown);
             doc.attachEvent('onkeydown', onkeydown);
+            doc.body.attachEvent('scroll', onscroll);
         }
 
         editor.observe("field:change", function() {
@@ -291,9 +313,7 @@ _EditorEvents = [
         editor['WKTextView_Installed'] = true;
     }
 
-    [self _resizeWebFrame];
-    [self _cursorDidMove];
-    [self _updateScrollers];
+    [self _updateScrollbar];
 
     [self setEnabled:enabled];
 }
@@ -303,12 +323,64 @@ _EditorEvents = [
     return editor;
 }
 
+- (void)_updateScrollbar
+{
+    var scrollTop = 0,
+        height = CGRectGetHeight([self bounds]),
+        frameHeight = CGRectGetHeight([self bounds]),
+        scrollerWidth = CGRectGetWidth([_verticalScroller bounds]);
+    if (_scrollDiv)
+    {
+        scrollTop = _scrollDiv.scrollTop;
+        height = _scrollDiv.scrollHeight;
+    }
+    height = MAX(frameHeight, height);
+
+    var difference = height - frameHeight;
+
+    [_verticalScroller setFloatValue:scrollTop / difference];
+    [_verticalScroller setKnobProportion:frameHeight / height];
+    [_verticalScroller setFrame:CGRectMake(CGRectGetMaxX([self bounds])-scrollerWidth, 0, scrollerWidth, CGRectGetHeight([self bounds]))];
+}
+
+- (void)_verticalScrollerDidScroll:(CPScroller)aScroller
+{
+    if (!_scrollDiv)
+        return; // Shouldn't happen. No editor means no scrollbar.
+
+    // Based on CPScrollView _verticalScrollerDidScroll
+    var scrollTop = _scrollDiv.scrollTop,
+        height = _scrollDiv.scrollHeight,
+        frameHeight = CGRectGetHeight([self bounds]),
+        value = [aScroller floatValue];
+
+    switch ([_verticalScroller hitPart])
+    {
+        case CPScrollerDecrementLine:   scrollTop -= _verticalLineScroll;
+                                        break;
+
+        case CPScrollerIncrementLine:   scrollTop += _verticalLineScroll;
+                                        break;
+
+        case CPScrollerDecrementPage:   scrollTop -= frameHeight - _verticalPageScroll;
+                                        break;
+
+        case CPScrollerIncrementPage:   scrollTop += frameHeight - _verticalPageScroll;
+                                        break;
+
+        case CPScrollerKnobSlot:
+        case CPScrollerKnob:
+                                        // We want integral bounds!
+        default:                        scrollTop = ROUND(value * (height - frameHeight));
+    }
+
+    _scrollDiv.scrollTop = scrollTop;
+}
+
 - (void)_didChange
 {
     // When the text changes, the height of the content may change.
-    [self _resizeWebFrame];
-    [self _cursorDidMove];
-    [self _updateScrollers];
+    [self _updateScrollbar];
 
     if ([delegate respondsToSelector:@selector(textViewDidChange:)])
     {
@@ -317,60 +389,10 @@ _EditorEvents = [
 
 }
 
-+ (INT)_countCharacters: aNode
-{
-    if (aNode.nodeType == 3)
-    {
-        return aNode.length;
-    }
-    else
-    {
-        var r=0;
-        for (var c=aNode.firstChild; c != null; c = c.nextSibling)
-        {
-            r += [WKTextView _countCharacters:c];
-        }
-        return r;
-    }
-}
-
 - (void)_cursorDidMove
 {
-    /*
-        It's possible to get the exact cursor position by inserting a div with a known
-        id and gettings its offset before removing it again. Unfortunately this causes
-        a ton of bugs like selections being lost, text paragraphs being reflowed and
-        spaces appearing and sticking in Opera. We use an estimate instead based on the
-        current span the cursor is in.
-    */
     if(![self DOMWindow])
         return;
-
-    var selection = [self DOMWindow].getSelection(),
-        n = selection != null ? selection.getNode() : null;
-    if (n)
-    {
-        var top = n.offsetTop,
-            height = n.offsetHeight,
-            cursorHeight = [self bounds].size.height * WKTextCursorHeightFactor,
-            position = selection.getRangeAt(0).startOffset,
-            characters = [WKTextView _countCharacters:n],
-            advance = 0;
-
-        if (characters > 0)
-            advance = position / characters;
-
-        //console.log("range.startOffset: "+editor.selection.getRange().startOffset+" range.endOffset: "+editor.selection.getRange().endOffset);
-        //console.log("top: "+top+" height:"+height+" position: "+position+" characters:"+ characters + " advance: "+advance);
-
-        var offset = FLOOR(top + advance * height),
-            scrollTop = MAX(0, offset-cursorHeight),
-            scollHeight = 2*cursorHeight;
-
-        //console.log("scrollTop: "+scrollTop+"scrollHeight: "+scollHeight);
-        [_frameView scrollRectToVisible:CGRectMake(0,offset-cursorHeight,1,2*cursorHeight)];
-        [self _updateScrollers];
-    }
 
     if ([delegate respondsToSelector:@selector(textViewCursorDidMove:)])
     {
@@ -378,60 +400,9 @@ _EditorEvents = [
     }
 }
 
-- (void)_updateScrollers
+- (void)_resizeWebFrame
 {
-    [_scrollView setNeedsDisplay:YES];
-}
-
-- (BOOL)_resizeWebFrame
-{
-    // We override because we don't care about the content height of the iframe but
-    // rather the content height of the editor's iframe.
-
-    // By default just match the iframe to available size.
-    var width = [_scrollView bounds].size.width,
-        desiredHeight = [self _setWidthAndCalculateHeight:width],
-        vscroller = [_scrollView verticalScroller];
-
-    // If the desired height will result in a vertical scrollbar we
-    // have to do it over again with the scrollbar in mind.
-    if (desiredHeight > [_scrollView bounds].size.height)
-        width -= [vscroller bounds].size.width;
-
-    var height = [self _setWidthAndCalculateHeight:width];
-
-    // Never make the iframe any shorter than the total available height.
-    height = MAX([self bounds].size.height, height);
-    _iframe.setAttribute("height", height);
-    [_frameView setFrameSize:CGSizeMake(width, height)];
-}
-
-- (int)_setWidthAndCalculateHeight: (int)width
-{
-    var height = [self bounds].size.height,
-        naturalHeight = height;
-
-    _iframe.setAttribute("width", width);
-
-    if (_scrollMode == CPWebViewScrollAppKit && editor !== nil && [self DOMWindow])
-    {
-        var body = [self DOMWindow].document.body;
-
-        // This needs to be before the height calculation so that the right height for the current
-        // width can be calculated.
-        body.style.width = width+"px";
-
-        // By default we keep the content div one view height taller than its natural content. This
-        // has two advantages: the text doesn't momentarily scroll up when you enter a new row until
-        // we have adjusted the size, and you can click anywhere to edit.
-
-        editor.style.height = 'auto';
-        naturalHeight = editor.scrollHeight;
-        editor.style.height = naturalHeight+height+'px';
-        //console.log("height: "+naturalHeight);
-    }
-
-    return naturalHeight;
+    [self _updateScrollbar];
 }
 
 - (void)_loadMainFrameURL
@@ -451,8 +422,8 @@ _EditorEvents = [
 
 - (void)_addKeypressHandler:(Function)aFunction
 {
-
-    if([self editor]){
+    if ([self editor])
+    {
         var doc = [self DOMWindow].document;
         if (doc.addEventListener)
         {
