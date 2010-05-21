@@ -423,8 +423,6 @@ _EditorEvents = [
 
 - (void)_loadMainFrameURL
 {
-    // Exactly like super, minus
-    // [self _setScrollMode:CPWebViewScrollNative];
     [self _startedLoading];
 
     _ignoreLoadStart = YES;
