@@ -69,7 +69,7 @@ _EditorEvents = [
         [self setMainFrameURL:[[CPBundle mainBundle] pathForResource:"WKTextView/editor.html"]];
 
         _verticalScroller = [[CPScroller alloc] initWithFrame:CGRectMake(0.0, 0.0, [CPScroller scrollerWidth], MAX(CGRectGetHeight([self bounds]), [CPScroller scrollerWidth]+1))];
-        [_verticalScroller setAutoresizingMask:CPViewHeightSizable | CPViewMinXMargin];
+        [_verticalScroller setAutoresizingMask:CPViewMinXMargin];
         [_verticalScroller setTarget:self];
         [_verticalScroller setAction:@selector(_verticalScrollerDidScroll:)];
 
@@ -304,7 +304,7 @@ _EditorEvents = [
         }
 
         editor.observe("field:change", function() {
-            [[CPRunLoop currentRunLoop] performSelector:"_didChange" target:self argument:nil order:0 modes:[CPDefaultRunLoopMode]];
+            [self _didChange];
             // The normal run loop doesn't react to iframe events, so force immediate processing.
             [[CPRunLoop currentRunLoop] limitDateForMode:CPDefaultRunLoopMode];
         });
@@ -330,7 +330,7 @@ _EditorEvents = [
 - (void)_updateScrollbar
 {
     var scrollTop = 0,
-        height = CGRectGetHeight([self bounds]),
+        height = 1,
         frameHeight = CGRectGetHeight([self bounds]),
         scrollerWidth = CGRectGetWidth([_verticalScroller bounds]);
     if (_scrollDiv)
@@ -338,13 +338,22 @@ _EditorEvents = [
         scrollTop = _scrollDiv.scrollTop;
         height = _scrollDiv.scrollHeight;
     }
-    height = MAX(frameHeight, height);
+    height = MAX(1, height);
 
-    var difference = height - frameHeight;
+    var difference = height - frameHeight,
+        proportion = frameHeight / height;
+
+    // Avoid showing the scrollbar when it would nearly fill the bar anyhow.
+    // This avoid the bar flickering like crazy when animating the text field
+    // growing or shrinking, as could otherwise happen due to the inner height
+    // not having updated yet to fit to the outter height when the scroll bar
+    // update happens.
+    if (proportion > 0.99)
+        proportion = 1;
 
     [_verticalScroller setFloatValue:scrollTop / difference];
-    [_verticalScroller setKnobProportion:frameHeight / height];
-    [_verticalScroller setFrame:CGRectMake(CGRectGetMaxX([self bounds])-scrollerWidth, 0, scrollerWidth, CGRectGetHeight([self bounds]))];
+    [_verticalScroller setKnobProportion:proportion];
+    [_verticalScroller setFrame:CGRectMake(CGRectGetMaxX([self bounds])-scrollerWidth, 0, scrollerWidth, frameHeight)];
 }
 
 - (void)_verticalScrollerDidScroll:(CPScroller)aScroller
