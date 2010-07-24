@@ -130,6 +130,7 @@ _EditorEvents = [
 
 - (BOOL)becomeFirstResponder
 {
+    [self _didBeginEditing];
     editor.focus();
     return YES;
 }
@@ -137,6 +138,7 @@ _EditorEvents = [
 - (BOOL)resignFirstResponder
 {
     window.focus();
+    [self _didEndEditing];
     return YES;
 }
 
@@ -401,6 +403,18 @@ _EditorEvents = [
         [delegate textViewDidChange:self];
     }
 
+}
+
+- (void)_didBeginEditing
+{
+    if ([delegate respondsToSelector:@selector(textViewDidBeginEditing:)])
+        [delegate textViewDidBeginEditing:self];
+}
+
+- (void)_didEndEditing
+{
+    if ([delegate respondsToSelector:@selector(textViewDidEndEditing:)])
+        [delegate textViewDidEndEditing:self];
 }
 
 - (void)_cursorDidMove
