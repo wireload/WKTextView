@@ -28,7 +28,7 @@ _EditorEvents = [
 ]
 
 /*!
-    A WYSIHAT based rich text editor widget.
+    A closure editor based rich text editor widget.
 
     Beware of the load times. Wait for the load event.
 */
@@ -100,9 +100,11 @@ _EditorEvents = [
 - (void)checkLoad
 {
     // Is the editor ready?
-    var maybeEditor = [self objectByEvaluatingJavaScriptFromString:"typeof(__wysihat_editor) != 'undefined' ? __wysihat_editor : null"];
-    if (maybeEditor && maybeEditor.parentNode && maybeEditor.parentNode.parentNode)
+    var maybeEditor = [self objectByEvaluatingJavaScriptFromString:"typeof(__closure_editor) != 'undefined' ? __closure_editor : null"];
+
+    if (maybeEditor)
     {
+        _scrollDiv = maybeEditor.__scroll_div;
         [self setEditor:maybeEditor];
 
         if (loadTimer)
@@ -164,11 +166,16 @@ _EditorEvents = [
 - (void)setEnabled:(BOOL)shouldBeEnabled
 {
     enabled = shouldBeEnabled;
-    if (editor) {
-        editor.contentEditable = enabled ? 'true' : 'false';
+    if (editor)
+    {
+        if (shouldBeEnabled)
+            editor.makeEditable();
+        else
+            editor.makeUneditable();
+
         // When contentEditable is off we must disable wysihat event handlers
         // or they'll cause errors e.g. if a user clicks a disabled WKTextView.
-        var t = editor;
+        /*var t = editor;
         for(var i=0; i<_EditorEvents.length; i++) {
             var ev = _EditorEvents[i];
             if (!enabled && t[ev] !== _CancelEvent)
@@ -180,7 +187,7 @@ _EditorEvents = [
             {
                 t[ev] = [eventHandlerSwizzler objectForKey:ev];
             }
-        }
+        }*/
     }
 }
 
@@ -216,7 +223,6 @@ _EditorEvents = [
         return;
 
     editor = anEditor;
-    _scrollDiv = editor.parentNode.parentNode;
     _iframe.allowTransparency = true;
 
     [self DOMWindow].document.body.style.backgroundColor = 'transparent';
@@ -226,7 +232,7 @@ _EditorEvents = [
     // editor.focus();
 
     suppressAutoFocus = YES;
-    [self setFontNameForSelection:WKTextViewDefaultFont];
+    //[self setFontNameForSelection:WKTextViewDefaultFont];
     suppressAutoFocus = NO;
 
     if (editor['WKTextView_Installed'] === undefined)
@@ -306,23 +312,22 @@ _EditorEvents = [
             doc.body.attachEvent('scroll', onscroll);
         }
 
-        editor.observe("field:change", function() {
+        editor.__fieldChangeExternal = function() {
             [self _didChange];
             // The normal run loop doesn't react to iframe events, so force immediate processing.
             [[CPRunLoop currentRunLoop] limitDateForMode:CPDefaultRunLoopMode];
-        });
-        editor.observe("selection:change", function() {
+        };
+        editor.__selectionChangeExternal = function() {
             [self _cursorDidMove];
             // The normal run loop doesn't react to iframe events, so force immediate processing.
             [[CPRunLoop currentRunLoop] limitDateForMode:CPDefaultRunLoopMode];
-        });
+        };
 
         editor['WKTextView_Installed'] = true;
     }
 
-    [self _resizeWebFrame];
-
     [self setEnabled:enabled];
+    [self _resizeWebFrame];
 }
 
 - (JSObject)editor
@@ -431,7 +436,8 @@ _EditorEvents = [
 - (void)_resizeWebFrame
 {
     if (editor)
-        editor.style.minHeight = (CGRectGetHeight([self bounds])-(2+WKTextViewInnerPadding*2)) + "px";
+//        editor.setMinHeight(CGRectGetHeight([self bounds]) - (2+WKTextViewInnerPadding*2));
+        editor.getElement().style.minHeight = (CGRectGetHeight([self bounds])-(2+WKTextViewInnerPadding*2)) + "px";
     [self _updateScrollbar];
 }
 
@@ -468,23 +474,12 @@ _EditorEvents = [
 
 - (CPString)htmlValue
 {
-    return [self editor].innerHTML;
+    return editor.getCleanContents();
 }
 
 - (void)setHtmlValue:(CPString)html
 {
-    [self editor].innerHTML = html;
-    [self _didChange];
-}
-
-- (CPString)textValue
-{
-    return [self editor].content();
-}
-
-- (void)setTextValue:(CPString)content
-{
-    [self editor].setContent(content);
+    editor.setHtml(false, html, false, false);
     [self _didChange];
 }
 
@@ -492,6 +487,7 @@ _EditorEvents = [
 {
     if (shouldFocusAfterAction && !suppressAutoFocus) {
         [self DOMWindow].focus();
+        editor.focus();
     }
 }
 
@@ -504,85 +500,96 @@ _EditorEvents = [
 
 - (void)insertHtml:(CPString)html
 {
-    [self editor].insertHTML(html);
+    [CPException raise:CPUnsupportedMethodException reason:"not available with google-closure editor yet"];
+
+    /*[self editor].insertHTML(html);
     [self _didChange];
-    [self _didPerformAction];
+    [self _didPerformAction];*/
 }
 
 - (@action)boldSelection:(id)sender
 {
-    [self editor].boldSelection();
+    editor.execCommand(editor.Command.BOLD, null);
     [self _didPerformAction];
 }
 
 - (@action)underlineSelection:(id)sender
 {
-    [self editor].underlineSelection();
+    editor.execCommand(editor.Command.UNDERLINE, null);
     [self _didPerformAction];
 }
 
 - (@action)italicSelection:(id)sender
 {
-    [self editor].italicSelection();
+    editor.execCommand(editor.Command.ITALIC, null);
     [self _didPerformAction];
 }
 
 - (@action)strikethroughSelection:(id)sender
 {
-    [self editor].strikethroughSelection();
+    editor.execCommand(editor.Command.STRIKE_THROUGH, null);
     [self _didPerformAction];
 }
 
 - (@action)alignSelectionLeft:(id)sender
 {
-    [self editor].alignSelection('left');
+    editor.execCommand(editor.Command.JUSTIFY_LEFT, null);
     [self _didPerformAction];
 }
 
 - (@action)alignSelectionRight:(id)sender
 {
-    [self editor].alignSelection('right');
+    editor.execCommand(editor.Command.JUSTIFY_RIGHT, null);
     [self _didPerformAction];
 }
 
 - (@action)alignSelectionCenter:(id)sender
 {
-    [self editor].alignSelection('center');
+    editor.execCommand(editor.Command.JUSTIFY_CENTER, null);
     [self _didPerformAction];
 }
 
 - (@action)alignSelectionFull:(id)sender
 {
-    [self editor].alignSelection('full');
+    editor.execCommand(editor.Command.JUSTIFY_FULL, null);
     [self _didPerformAction];
 }
 
 - (@action)linkSelection:(id)sender
 {
     // TODO Show a sheet asking for a URL to link to.
+    editor.execCommand(editor.Command.LINK, "http://www.wireload.net");
+    [self _didPerformAction];
 }
 
 - (void)linkSelectionToURL:(CPString)aUrl
 {
-    [self editor].linkSelection(aUrl);
+    var appWindow = editor.getAppWindow(),
+        prompt = appWindow['prompt'];
+
+    appWindow['prompt'] = function() {
+      return aUrl;
+    };
+
+    editor.execCommand(editor.Command.LINK, null);
+    appWindow['prompt'] = prompt;
     [self _didPerformAction];
 }
 
 - (void)unlinkSelection:(id)sender
 {
-    [self editor].unlinkSelection();
-    [self _didPerformAction];
+    [self linkSelectionToURL:nil];
 }
 
 - (@action)insertOrderedList:(id)sender
 {
-    [self editor].insertOrderedList();
+    editor.execCommand(editor.Command.ORDERED_LIST, null);
     [self _didPerformAction];
 }
 
 - (@action)insertUnorderedList:(id)sender
 {
-    [self editor].insertUnorderedList();
+    editor.execCommand(editor.Command.UNORDERED_LIST, null);
     [self _didPerformAction];
 }
 
@@ -593,21 +600,21 @@ _EditorEvents = [
 
 - (void)insertImageWithURL:(CPString)aUrl
 {
-    [self editor].insertImage(aUrl);
+    editor.execCommand(editor.Command.IMAGE, aUrl);
     [self _didPerformAction];
 }
 
-- (void)setFontNameForSelection:(CPString)font
+- (void)setFontNameForSelection:(CPString)aFont
 {
-    lastFont = font;
-    [self editor].fontSelection(font);
+    lastFont = aFont;
+    editor.execCommand(editor.Command.FONT_FACE, aFont);
     [self _didPerformAction];
 }
 
 - (int)fontSizeRaw
 {
     try {
-        return [self DOMWindow].document.queryCommandValue('fontsize');
+        return editor.queryCommandValue(editor.Command.FONT_SIZE);
     } catch(e) {
         return "16px";
     }
@@ -630,16 +637,16 @@ _EditorEvents = [
     Set the font size for the selected text. Size is specified
     as a number between 1-6 which corresponds to small through xx-large.
 */
-- (void)setFontSizeForSelection:(int)size
+- (void)setFontSizeForSelection:(int)aSize
 {
-    [self editor].fontSizeSelection(size);
+    editor.execCommand(editor.Command.FONT_SIZE, aSize);
     [self _didPerformAction];
 }
 
 - (CPString)font
 {
     try {
-        var fontName = [self DOMWindow].document.queryCommandValue('fontname');
+        var fontName = editor.queryCommandValue(editor.Command.FONT_FACE);
     } catch(e) {
         return lastFont;
     }
@@ -663,7 +670,7 @@ _EditorEvents = [
 {
     var colorString;
     try {
-        colorString = [self DOMWindow].document.queryCommandValue('forecolor');
+        colorString = editor.queryCommandValue(editor.Command.FONT_COLOR);
     } catch(e) {
         console.error(e);
     }
@@ -678,6 +685,6 @@ _EditorEvents = [
 
 - (void)setColorForSelection:(CPColor)aColor
 {
-    [self editor].colorSelection([aColor hexString]);
+    editor.execCommand(editor.Command.FONT_COLOR, [aColor hexString]);
     [self _didPerformAction];
 }

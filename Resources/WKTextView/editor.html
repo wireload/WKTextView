@@ -30,26 +30,46 @@
       padding: 4px;
     }
 
-    textarea {
-      display: none;
+    #textarea {
+      outline: 0px solid transparent;
+      background-color: transparent;
+      border: 0px;
     }
   </style>
 
-  <script type="text/javascript" src="wysihat.js"></script>
+  <script type="text/javascript" src="closure-editor.js"></script>
 </head>
 
 <body>
-  <script type="text/javascript" charset="utf-8">
-    Event.observe(window, 'load', function() {
-      __wysihat_editor = WysiHat.Editor.attach('textarea');
-      $('loading').hide();
-    });
-  </script>
-  <p id="loading">Loading editor...</p>
   <div id="scrolldiv">
     <div id="padder">
-      <textarea id="textarea"></textarea>
+      <div id='textarea'></div>
     </div>
   </div>
+  <script type="text/javascript" charset="utf-8">
+  __closure_editor = new goog.editor.SeamlessField('textarea');
+  __closure_editor.__scroll_div = document.getElementById('scrolldiv');
+  __closure_editor.Command = goog.editor.Command;
+
+  __closure_editor.registerPlugin(new goog.editor.plugins.BasicTextFormatter());
+  __closure_editor.registerPlugin(new goog.editor.plugins.RemoveFormatting());
+  __closure_editor.registerPlugin(new goog.editor.plugins.UndoRedo());
+  __closure_editor.registerPlugin(new goog.editor.plugins.ListTabHandler());
+  __closure_editor.registerPlugin(new goog.editor.plugins.SpacesTabHandler());
+  __closure_editor.registerPlugin(new goog.editor.plugins.EnterHandler());
+  __closure_editor.registerPlugin(new goog.editor.plugins.HeaderFormatter());
+  //__closure_editor.registerPlugin(new goog.editor.plugins.LinkDialogPlugin());
+
+  function __fieldChange() {
+    __closure_editor.__fieldChangeExternal();
+  }
+
+  function __selectionChange() {
+    __closure_editor.__selectionChangeExternal();
+  }
+
+  goog.events.listen(__closure_editor, goog.editor.Field.EventType.DELAYEDCHANGE, __fieldChange);
+  goog.events.listen(__closure_editor, goog.editor.Field.EventType.SELECTIONCHANGE, __selectionChange);
+  </script>
 </body>
 </html>
