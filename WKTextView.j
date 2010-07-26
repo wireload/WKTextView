@@ -168,9 +168,10 @@ _EditorEvents = [
     enabled = shouldBeEnabled;
     if (editor)
     {
-        if (shouldBeEnabled)
+        var isEnabled = !editor.isUneditable();
+        if (!isEnabled && shouldBeEnabled)
             editor.makeEditable();
-        else
+        else if (isEnabled && !shouldBeEnabled)
             editor.makeUneditable();
 
         // When contentEditable is off we must disable wysihat event handlers
@@ -435,7 +436,7 @@ _EditorEvents = [
 
 - (void)_resizeWebFrame
 {
-    if (editor)
+    if (editor && editor.getElement())
 //        editor.setMinHeight(CGRectGetHeight([self bounds]) - (2+WKTextViewInnerPadding*2));
         editor.getElement().style.minHeight = (CGRectGetHeight([self bounds])-(2+WKTextViewInnerPadding*2)) + "px";
     [self _updateScrollbar];
