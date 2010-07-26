@@ -47,6 +47,9 @@
     </div>
   </div>
   <script type="text/javascript" charset="utf-8">
+   // The regular 250 causes noticable UI delays. Apply 1/10s is unnoticable rule of thumb.
+  goog.editor.Field.DELAYED_CHANGE_FREQUENCY = 100;
+
   __closure_editor = new goog.editor.SeamlessField('textarea');
   __closure_editor.__scroll_div = document.getElementById('scrolldiv');
   __closure_editor.Command = goog.editor.Command;
