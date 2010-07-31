@@ -51,6 +51,8 @@ _EditorEvents = [
     float           _verticalLineScroll;
     float           _verticalPageScroll;
 
+    boolean         _cursorPlaced;
+
 }
 
 - (id)initWithFrame:(CGRect)aFrame
@@ -88,6 +90,7 @@ _EditorEvents = [
 {
     // If the frame reloads for whatever reason, the editor is gone.
     editor = nil;
+    _cursorPlaced = NO;
     [super _startedLoading];
 }
 
@@ -133,7 +136,13 @@ _EditorEvents = [
 - (BOOL)becomeFirstResponder
 {
     [self _didBeginEditing];
-    editor.focus();
+    if (_cursorPlaced)
+        editor.focus();
+    else
+    {
+        editor.focusAndPlaceCursorAtStart();
+        _cursorPlaced = YES;
+    }
     return YES;
 }
 
@@ -481,6 +490,8 @@ _EditorEvents = [
 - (void)setHtmlValue:(CPString)html
 {
     editor.setHtml(false, html, false, false);
+    _cursorPlaced = NO;
+
     [self _didChange];
 }
 

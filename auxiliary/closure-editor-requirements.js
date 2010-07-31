@@ -20,6 +20,7 @@ goog.exportSymbol('goog.editor.Field.DELAYED_CHANGE_FREQUENCY', goog.editor.Fiel
 goog.exportSymbol('goog.editor.SeamlessField', goog.editor.SeamlessField);
 goog.exportProperty(goog.editor.SeamlessField.prototype, 'executeCommand', goog.editor.SeamlessField.prototype.executeCommand);
 goog.exportProperty(goog.editor.SeamlessField.prototype, 'focus', goog.editor.SeamlessField.prototype.focus);
+goog.exportProperty(goog.editor.SeamlessField.prototype, 'focusAndPlaceCursorAtStart', goog.editor.SeamlessField.prototype.focusAndPlaceCursorAtStart);
 goog.exportProperty(goog.editor.SeamlessField.prototype, 'getAppWindow', goog.editor.SeamlessField.prototype.getAppWindow);
 goog.exportProperty(goog.editor.SeamlessField.prototype, 'getCleanContents', goog.editor.SeamlessField.prototype.getCleanContents);
 goog.exportProperty(goog.editor.SeamlessField.prototype, 'getElement', goog.editor.SeamlessField.prototype.getElement);
