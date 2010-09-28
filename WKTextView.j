@@ -94,6 +94,21 @@ _EditorEvents = [
     [super _startedLoading];
 }
 
+- (void)viewDidHide
+{
+    // Editor can't be used at all while hidden due to the iframe unloading.
+    editor = nil;
+    _cursorPlaced = NO;
+}
+
+- (void)viewDidUnhide
+{
+    if (editor === nil)
+        [self checkLoad];
+    else
+        [self _actualizeEnabledState];
+}
+
 - (void)_finishedLoading
 {
     [super _finishedLoading];
@@ -102,6 +117,10 @@ _EditorEvents = [
 
 - (void)checkLoad
 {
+    // We can't load if hidden. Load checking will be resumed by viewDidUnhide later.
+    if ([self isHiddenOrHasHiddenAncestor])
+        return;
+
     // Is the editor ready?
     var maybeEditor = [self objectByEvaluatingJavaScriptFromString:"typeof(__closure_editor) != 'undefined' ? __closure_editor : null"];
 
@@ -174,13 +193,22 @@ _EditorEvents = [
 */
 - (void)setEnabled:(BOOL)shouldBeEnabled
 {
+    if (enabled === shouldBeEnabled)
+        return;
+
     enabled = shouldBeEnabled;
+
+    [self _actualizeEnabledState];
+}
+
+- (void)_actualizeEnabledState
+{
     if (editor)
     {
         var isEnabled = !editor.isUneditable();
-        if (!isEnabled && shouldBeEnabled)
+        if (!isEnabled && enabled)
             editor.makeEditable();
-        else if (isEnabled && !shouldBeEnabled)
+        else if (isEnabled && !enabled)
             editor.makeUneditable();
 
         // When contentEditable is off we must disable wysihat event handlers
@@ -224,7 +252,30 @@ _EditorEvents = [
     return shouldFocusAfterAction;
 }
 
-- (void)setEditor:anEditor
+- (BOOL)tryToBecomeFirstResponder
+{
+    var win = [self window];
+    if ([win firstResponder] === self)
+        return YES;
+
+    // We have to emulate select pieces of CPWindow's event handling
+    // here since the iframe bypasses the regular event handling.
+    var becameFirst = false;
+    if ([self acceptsFirstResponder])
+    {
+        becameFirst = [win makeFirstResponder:self];
+        if (becameFirst)
+        {
+            if (![win isKeyWindow])
+                [win makeKeyAndOrderFront:self];
+            [[CPRunLoop currentRunLoop] limitDateForMode:CPDefaultRunLoopMode];
+        }
+    }
+
+    return becameFirst;
+}
+
+- (void)setEditor:(Object)anEditor
 {
     if (editor === anEditor)
         return;
@@ -247,30 +298,13 @@ _EditorEvents = [
 
     if (editor['WKTextView_Installed'] === undefined)
     {
-        var doc = [self DOMWindow].document;
+        var win = [self DOMWindow],
+            doc = win.document;
 
         var onmousedown = function(ev) {
-            if (!ev)
-                ev = window.event;
-            var win = [self window];
-            if ([win firstResponder] === self)
-                return YES;
-            // We have to emulate select pieces of CPWindow's event handling
-            // here since the iframe bypasses the regular event handling.
-            var becameFirst = false;
-            if ([self acceptsFirstResponder])
-            {
-                becameFirst = [win makeFirstResponder:self];
-                if (becameFirst)
-                {
-                    if (![win isKeyWindow])
-                        [win makeKeyAndOrderFront:self];
-                    [[CPRunLoop currentRunLoop] limitDateForMode:CPDefaultRunLoopMode];
-                }
-            }
             // If selection was successful, allow the event to continue propagate so that the
             // cursor is placed in the right spot.
-            return becameFirst;
+            return [self tryToBecomeFirstResponder];
         }
 
         defaultKeydown = doc.onkeydown;
@@ -312,7 +346,7 @@ _EditorEvents = [
         if (doc.addEventListener)
         {
             doc.addEventListener('mousedown', onmousedown, true);
-            doc.addEventListener('keydown', onkeydown, true);
+            editor.addEventListener('keydown', onkeydown, true);
             doc.body.addEventListener('scroll', onscroll, true);
         }
         else if(doc.attachEvent)
@@ -327,7 +361,12 @@ _EditorEvents = [
             // The normal run loop doesn't react to iframe events, so force immediate processing.
             [[CPRunLoop currentRunLoop] limitDateForMode:CPDefaultRunLoopMode];
         };
-        editor.__selectionChangeExternal = function() {
+        editor.__selectionChangeExternal = function()
+        {
+            // Workaround for Firefox not firing our iframe mousedown handler - we have
+            // to do the first responder promotion here instead.
+            [self tryToBecomeFirstResponder];
+
             [self _cursorDidMove];
             // The normal run loop doesn't react to iframe events, so force immediate processing.
             [[CPRunLoop currentRunLoop] limitDateForMode:CPDefaultRunLoopMode];
@@ -336,13 +375,14 @@ _EditorEvents = [
         editor['WKTextView_Installed'] = true;
     }
 
-    [self setEnabled:enabled];
+    [self _actualizeEnabledState];
     [self _resizeWebFrame];
 }
 
 - (JSObject)editor
 {
-    return editor;
+    // editor can never be active while hidden.
+    return [self isHiddenOrHasHiddenAncestor] ? nil : editor;
 }
 
 - (void)_updateScrollbar
@@ -684,7 +724,7 @@ _EditorEvents = [
     try {
         colorString = editor.queryCommandValue(editor.Command.FONT_COLOR);
     } catch(e) {
-        console.error(e);
+        CPLog.warning(e);
     }
     // Avoid creating a new Color instance every time the cursor moves by reusing the last
     // instance.
