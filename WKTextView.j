@@ -53,6 +53,7 @@ _EditorEvents = [
 
     boolean         _cursorPlaced;
 
+    boolean         _isTryingToBecomeFirstResponder;
 }
 
 - (id)initWithFrame:(CGRect)aFrame
@@ -254,6 +255,9 @@ _EditorEvents = [
 
 - (BOOL)tryToBecomeFirstResponder
 {
+    if (_isTryingToBecomeFirstResponder)
+        return YES;
+
     var win = [self window];
     if ([win firstResponder] === self)
         return YES;
@@ -261,15 +265,23 @@ _EditorEvents = [
     // We have to emulate select pieces of CPWindow's event handling
     // here since the iframe bypasses the regular event handling.
     var becameFirst = false;
-    if ([self acceptsFirstResponder])
+
+    _isTryingToBecomeFirstResponder = YES;
+    try
     {
-        becameFirst = [win makeFirstResponder:self];
-        if (becameFirst)
+        if ([self acceptsFirstResponder])
         {
-            if (![win isKeyWindow])
-                [win makeKeyAndOrderFront:self];
-            [[CPRunLoop currentRunLoop] limitDateForMode:CPDefaultRunLoopMode];
+            becameFirst = [win makeFirstResponder:self];
+            if (becameFirst)
+            {
+                if (![win isKeyWindow])
+                    [win makeKeyAndOrderFront:self];
+                [[CPRunLoop currentRunLoop] limitDateForMode:CPDefaultRunLoopMode];
+            }
         }
+    } finally
+    {
+        _isTryingToBecomeFirstResponder = NO;
     }
 
     return becameFirst;
@@ -363,11 +375,12 @@ _EditorEvents = [
         };
         editor.__selectionChangeExternal = function()
         {
+            [self _cursorDidMove];
+
             // Workaround for Firefox not firing our iframe mousedown handler - we have
             // to do the first responder promotion here instead.
             [self tryToBecomeFirstResponder];
 
-            [self _cursorDidMove];
             // The normal run loop doesn't react to iframe events, so force immediate processing.
             [[CPRunLoop currentRunLoop] limitDateForMode:CPDefaultRunLoopMode];
         };
