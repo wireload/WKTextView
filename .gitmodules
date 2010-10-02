@@ -1,6 +1,3 @@
-[submodule "wysihat"]
-	path = wysihat
-	url = git://github.com/aljungberg/wysihat.git
 [submodule "auxiliary/google-closure-library"]
 	path = auxiliary/google-closure-library
-	url = git@github.com:aljungberg/google-closure-library.git
+	url = git://github.com/aljungberg/google-closure-library.git
