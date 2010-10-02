@@ -1,4 +1,4 @@
-CLOSURE_LIBRARY=../../closure-library
+CLOSURE_LIBRARY=../../google-closure-library
 CLOSURE_COMPILER=../../deps/closurecompiler/compiler.jar
 DESTINATION=../Resources/WKTextView/closure-editor.js
 
