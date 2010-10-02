@@ -130,22 +130,15 @@ _EditorEvents = [
         _scrollDiv = maybeEditor.__scroll_div;
         [self setEditor:maybeEditor];
 
-        if (loadTimer)
-        {
-            [loadTimer invalidate];
-            loadTimer = nil;
-         }
-
         if ([delegate respondsToSelector:@selector(textViewDidLoad:)])
-        {
             [delegate textViewDidLoad:self];
-        }
+
+        return;
     }
-    else
-    {
-        if (!loadTimer)
-            loadTimer = [CPTimer scheduledTimerWithTimeInterval:0.1 target:self selector:"checkLoad" userInfo:nil repeats:YES];
-    }
+
+    // If we still don't have an editor, check again later.
+    if (!loadTimer || ![loadTimer isValid])
+        loadTimer = [CPTimer scheduledTimerWithTimeInterval:0.1 target:self selector:"checkLoad" userInfo:nil repeats:NO];
 }
 
 - (BOOL)acceptsFirstResponder
