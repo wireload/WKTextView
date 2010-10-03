@@ -3,11 +3,11 @@ WyzihatKit
 
 A [Cappuccino](http://cappuccino.org/) control providing rich text editing through use of the [WysiHat](http://github.com/josh/wysihat/) editor.
 
-This is mostly a hack for use until a proper rich text capable CPTextView is introduced.
+This is mostly a hack for use until a proper rich-text-capable `CPTextView` is introduced.
 
 ## Installation
 
-Link the `WyzihatKit` folder into your `Frameworks` folder. Then copy `WyzihatKit/Resources/WKTextView` into `Resources/WKTextView`.
+Link the `WyzihatKit` folder into your `Frameworks` folder.
 
 Create and combine the `wyzihat.js` file using the WyzihatKit modified version of WysiHat:
 
@@ -20,8 +20,6 @@ Create and combine the `wyzihat.js` file using the WyzihatKit modified version o
 	cat dist/prototype.js dist/wysihat.js >../Resources/WKTextView/wysihat.js
 
 Optionally minify the combined `wysihat.js` - it will shrink very well.
-
-Copy your combined `wysihat.js` into your deployment `Resources/WKTextView`.
 
 ## Usage
 
@@ -39,8 +37,6 @@ A sample program is provided in the `sample` folder. You can [view it online](ht
 	capp gen -f -l --force # Installs Cappuccino frameworks.
 	cd Frameworks
 	ln -s ../../ WyzihatKit
-	cd ..
-	cp <WYZIHAT_BUILD>/wysihat.js Resources/WKTextView
 
 Then open up `index-debug.html` in a browser.
 
