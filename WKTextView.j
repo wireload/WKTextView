@@ -351,8 +351,20 @@ _EditorEvents = [
     // growing or shrinking, as could otherwise happen due to the inner height
     // not having updated yet to fit to the outter height when the scroll bar
     // update happens.
-    if (proportion > 0.99)
+
+    // Additionally, hide the scroller if there is no need to show one.
+    
+    if (proportion > 0.99) {
+
+        [_verticalScroller setHidden:YES];
         proportion = 1;
+	
+    } else {
+	
+	[_verticalScroller setHidden:NO];
+	
+    }
+        
 
     [_verticalScroller setFloatValue:scrollTop / difference];
     [_verticalScroller setKnobProportion:proportion];
