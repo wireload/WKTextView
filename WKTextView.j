@@ -62,6 +62,9 @@ _EditorEvents = [
         _verticalPageScroll = 10;
         _verticalLineScroll = 10;
 
+	[self setDrawsBackground:NO];
+	[self setBackgroundColor:[CPColor whiteColor]];
+
         eventHandlerSwizzler = [[CPDictionary alloc] init];
         shouldFocusAfterAction = YES;
         [self setEditable: YES];
