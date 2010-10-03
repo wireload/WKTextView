@@ -67,8 +67,8 @@ _EditorEvents = [
         [self setEditable: YES];
         [self setEnabled: YES];
         [self setScrollMode:CPWebViewScrollNative];
-        [self setMainFrameURL:[[CPBundle mainBundle] pathForResource:"WKTextView/editor.html"]];
-
+        [self setMainFrameURL:[[CPBundle bundleForClass:[self class]] pathForResource:"WKTextView/editor.html"]];
+	
         _verticalScroller = [[CPScroller alloc] initWithFrame:CGRectMake(0.0, 0.0, [CPScroller scrollerWidth], MAX(CGRectGetHeight([self bounds]), [CPScroller scrollerWidth]+1))];
         [_verticalScroller setAutoresizingMask:CPViewMinXMargin];
         [_verticalScroller setTarget:self];
