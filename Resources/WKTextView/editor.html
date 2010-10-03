@@ -21,7 +21,13 @@
     #scrolldiv {
       width: 100%;
       height: 100%;
+
       padding-right: 12px;
+	
+	/*	The right padding hides the native scrollbar.
+		However the real width of the native scrollbar varies, 
+		so we use a sniffer script. */
+
       overflow-x: hidden;
       overflow-y: scroll;
     }
@@ -36,20 +42,63 @@
   </style>
 
   <script type="text/javascript" src="wysihat.js"></script>
+  
 </head>
 
 <body>
+  
   <script type="text/javascript" charset="utf-8">
     Event.observe(window, 'load', function() {
       __wysihat_editor = WysiHat.Editor.attach('textarea');
       $('loading').hide();
     });
   </script>
+  
   <p id="loading">Loading editor...</p>
   <div id="scrolldiv">
     <div id="padder">
       <textarea id="textarea"></textarea>
     </div>
   </div>
+
+  <script type="text/javascript" charset="utf-8">
+
+  //	http://www.fleegix.org/articles/2006-05-30-getting-the-scrollbar-width-in-pixels
+
+      function getScrollerWidth () {
+
+    		var scr = null;
+    		var inn = null;
+    		var wNoScroll = 0;
+    		var wScroll = 0;
+
+    		scr = document.createElement('div');
+    		scr.style.position = 'absolute';
+    		scr.style.top = '-1000px';
+    		scr.style.left = '-1000px';
+    		scr.style.width = '100px';
+    		scr.style.height = '50px';
+    		scr.style.overflow = 'hidden';
+
+    		inn = document.createElement('div');
+    		inn.style.width = '100%';
+    		inn.style.height = '200px';
+
+    		scr.appendChild(inn);
+    		document.body.appendChild(scr);
+
+    		wNoScroll = inn.offsetWidth;
+    		scr.style.overflow = 'auto';
+    		wScroll = inn.offsetWidth;
+    		document.body.removeChild(document.body.lastChild);
+
+    		return (wNoScroll - wScroll);
+
+    	}
+
+    	document.getElementById("scrolldiv").style.paddingRight = (getScrollerWidth() || 0) + "px";
+
+  </script>
+
 </body>
 </html>
