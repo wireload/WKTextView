@@ -49,4 +49,5 @@ WysihatKit is released under the MIT license. The sample incorporates Creative C
 * Alexander Ljungberg, [WireLoad LLC](http://wireload.net)
 * xanados
 * Paul Baumgart
+* Evadne Wu
 * Harry Vangberg
