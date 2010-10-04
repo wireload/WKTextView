@@ -65,14 +65,17 @@ _EditorEvents = [
         _verticalPageScroll = 10;
         _verticalLineScroll = 10;
 
+        [self setDrawsBackground:NO];
+        [self setBackgroundColor:[CPColor whiteColor]];
+
         eventHandlerSwizzler = [[CPDictionary alloc] init];
         shouldFocusAfterAction = YES;
         [self setEditable: YES];
         [self setEnabled: YES];
         [self setScrollMode:CPWebViewScrollNative];
-        [self setMainFrameURL:[[CPBundle mainBundle] pathForResource:"WKTextView/editor.html"]];
+        [self setMainFrameURL:[[CPBundle bundleForClass:[self class]] pathForResource:"WKTextView/editor.html"]];
 
-        _verticalScroller = [[CPScroller alloc] initWithFrame:CGRectMake(0.0, 0.0, [CPScroller scrollerWidth], MAX(CGRectGetHeight([self bounds]), [CPScroller scrollerWidth]+1))];
+        _verticalScroller = [[CPScroller alloc] initWithFrame:CGRectMake(0.0, 0.0, [CPScroller scrollerWidth], MAX(CGRectGetHeight([self bounds]), [CPScroller scrollerWidth] + 1))];
         [_verticalScroller setAutoresizingMask:CPViewMinXMargin];
         [_verticalScroller setTarget:self];
         [_verticalScroller setAction:@selector(_verticalScrollerDidScroll:)];
@@ -354,7 +357,7 @@ _EditorEvents = [
             editor.addEventListener('keydown', onkeydown, true);
             doc.body.addEventListener('scroll', onscroll, true);
         }
-        else if(doc.attachEvent)
+        else if (doc.attachEvent)
         {
             doc.attachEvent('onmousedown', onmousedown);
             doc.attachEvent('onkeydown', onkeydown);
@@ -412,8 +415,20 @@ _EditorEvents = [
     // growing or shrinking, as could otherwise happen due to the inner height
     // not having updated yet to fit to the outter height when the scroll bar
     // update happens.
+
+    // Additionally, hide the scroller if there is no need to show one.
+
     if (proportion > 0.99)
+    {
+        [_verticalScroller setHidden:YES];
         proportion = 1;
+
+    }
+    else
+    {
+        [_verticalScroller setHidden:NO];
+    }
+
 
     [_verticalScroller setFloatValue:scrollTop / difference];
     [_verticalScroller setKnobProportion:proportion];
@@ -480,7 +495,7 @@ _EditorEvents = [
 
 - (void)_cursorDidMove
 {
-    if(![self DOMWindow])
+    if (![self DOMWindow])
         return;
 
     if ([delegate respondsToSelector:@selector(textViewCursorDidMove:)])
@@ -543,7 +558,8 @@ _EditorEvents = [
 
 - (void)_didPerformAction
 {
-    if (shouldFocusAfterAction && !suppressAutoFocus) {
+    if (shouldFocusAfterAction && !suppressAutoFocus)
+    {
         [self DOMWindow].focus();
         editor.focus();
     }
@@ -703,7 +719,8 @@ _EditorEvents = [
 
 - (CPString)font
 {
-    try {
+    try
+    {
         var fontName = editor.queryCommandValue(editor.Command.FONT_FACE);
     } catch(e) {
         return lastFont;
@@ -713,13 +730,10 @@ _EditorEvents = [
     var format = /'(.*?)'/,
         r = fontName ? fontName.match(new RegExp(format)) : nil;
 
-    if (r && r.length == 2) {
+    if (r && r.length == 2)
         lastFont = r[1];
-    }
     else if (fontName)
-    {
         lastFont = fontName;
-    }
 
     return lastFont;
 }

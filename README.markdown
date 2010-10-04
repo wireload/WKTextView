@@ -3,11 +3,11 @@ WyzihatKit
 
 A [Cappuccino](http://cappuccino.org/) control providing rich text editing through use of the [Google Closure Library](http://code.google.com/closure/library/) editor. In the master branch the Wysihat editor is used, hence the framework name.
 
-This is mostly a hack for use until a proper rich text capable CPTextView is introduced.
+This is mostly a hack for use until a proper rich-text-capable `CPTextView` is introduced.
 
 ## Installation
 
-Link the `WyzihatKit` folder into your `Frameworks` folder. Then copy `WyzihatKit/Resources/WKTextView` into `Resources/WKTextView`.
+Link the `WyzihatKit` folder into your `Frameworks` folder.
 
 Create and combine the `Resources/WKTextView/closure-editor.js` file using the WyzihatKit modified version of the Closure editor:
 
@@ -32,8 +32,6 @@ A sample program is provided in the `sample` folder. You can [view it online](ht
 	capp gen -f -l --force # Installs Cappuccino frameworks.
 	cd Frameworks
 	ln -s ../../ WyzihatKit
-	cd ..
-	cp <WYZIHAT_BUILD>/wysihat.js Resources/WKTextView
 
 Then open up `index-debug.html` in a browser.
 
@@ -46,4 +44,5 @@ WysihatKit is released under the Apache License 2.0. The sample incorporates Cre
 * Alexander Ljungberg, [WireLoad LLC](http://wireload.net)
 * xanados
 * Paul Baumgart
+* Evadne Wu
 * Harry Vangberg
