@@ -42,6 +42,8 @@ _EditorEvents = [
     BOOL            suppressAutoFocus;
     BOOL            editable;
     BOOL            enabled;
+    BOOL            autohidesScrollers @accessors;
+
     CPString        lastFont;
     CPString        lastColorString;
     CPColor         lastColor;
@@ -64,6 +66,8 @@ _EditorEvents = [
 
         _verticalPageScroll = 10;
         _verticalLineScroll = 10;
+
+        autohidesScrollers = YES;
 
         [self setDrawsBackground:NO];
         [self setBackgroundColor:[CPColor whiteColor]];
@@ -196,6 +200,16 @@ _EditorEvents = [
     enabled = shouldBeEnabled;
 
     [self _actualizeEnabledState];
+}
+
+- (void)setAutohidesScrollers:(BOOL)aFlag
+{
+    if (autohidesScrollers === aFlag)
+        return;
+
+    autohidesScrollers = aFlag;
+
+    [self _updateScrollbar];
 }
 
 - (void)_actualizeEnabledState
@@ -400,6 +414,7 @@ _EditorEvents = [
         height = 1,
         frameHeight = CGRectGetHeight([self bounds]),
         scrollerWidth = CGRectGetWidth([_verticalScroller bounds]);
+
     if (_scrollDiv)
     {
         scrollTop = _scrollDiv.scrollTop;
@@ -411,24 +426,15 @@ _EditorEvents = [
         proportion = frameHeight / height;
 
     // Avoid showing the scrollbar when it would nearly fill the bar anyhow.
-    // This avoid the bar flickering like crazy when animating the text field
+    // This avoids the bar flickering like crazy when animating the text field
     // growing or shrinking, as could otherwise happen due to the inner height
     // not having updated yet to fit to the outter height when the scroll bar
     // update happens.
-
-    // Additionally, hide the scroller if there is no need to show one.
-
     if (proportion > 0.99)
-    {
-        [_verticalScroller setHidden:YES];
         proportion = 1;
 
-    }
-    else
-    {
-        [_verticalScroller setHidden:NO];
-    }
-
+    // Additionally, hide the scroller if there is no need to show one.
+    [_verticalScroller setHidden:autohidesScrollers && proportion == 1];
 
     [_verticalScroller setFloatValue:scrollTop / difference];
     [_verticalScroller setKnobProportion:proportion];

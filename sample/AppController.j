@@ -38,6 +38,7 @@ var NewToolbarItemIdentifier = "NewToolbarItemIdentifier",
         contentView = [theWindow contentView];
 
     editorView = [[WKTextView alloc] initWithFrame:[theWindow frame]];
+    [editorView setAutohidesScrollers:NO];
     [editorView setAutoresizingMask:CPViewWidthSizable | CPViewHeightSizable];
     [editorView setDelegate:self];
     [editorView setShouldFocusAfterAction:YES];
