@@ -6,6 +6,9 @@
  *
  */
 
+@import <AppKit/AppKit.j>
+@import <Foundation/CPTimer.j>
+
 WKTextCursorHeightFactor = 0.2;
 WKTextViewInnerPadding = 4;
 WKTextViewDefaultFont = "Verdana";
