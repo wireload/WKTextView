@@ -118,6 +118,9 @@ _EditorEvents = [
             loadTimer = nil;
          }
 
+	if (_html != nil);
+	[self editor].innerHTML = _html;
+
         if ([delegate respondsToSelector:@selector(textViewDidLoad:)])
         {
             [delegate textViewDidLoad:self];
@@ -340,7 +343,6 @@ _EditorEvents = [
     }
 
     [self _resizeWebFrame];
-
     [self setEnabled:enabled];
 }
 
@@ -495,8 +497,13 @@ _EditorEvents = [
 }
 
 - (void)setHtmlValue:(CPString)html
-{
-    [self editor].innerHTML = html;
+{	
+    if ([self editor] != nil) {
+        [self editor].innerHTML = html;
+    } else {	
+        _html = html;
+    }
+    
     [self _didChange];
 }
 
