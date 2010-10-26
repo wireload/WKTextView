@@ -6,6 +6,29 @@
  *
  */
 
+@implementation _WKWebView : CPWebView
+
+- (DOMWindow) DOMWindow
+{
+    var contentWindow = nil;	
+    try
+    {
+        contentWindow = [super DOMWindow];	
+    }
+    catch (e)
+    {
+    //  Do nothing.  When the Web View is not added to the DOM, it booms.
+    //  Just ignore the boom because WKTextView checks multiple times.
+    }
+    return contentWindow;
+}
+
+@end
+
+
+
+
+
 WKTextCursorHeightFactor = 0.2;
 WKTextViewInnerPadding = 4;
 WKTextViewDefaultFont = "Verdana";
@@ -15,7 +38,7 @@ _CancelEvent = function(ev) {
         ev = window.event;
     if (ev && ev.stopPropagation)
         ev.stopPropagation();
-    else
+    else if (ev && ev.cancelBubble)
         ev.cancelBubble = true;
 }
 
@@ -32,7 +55,7 @@ _EditorEvents = [
 
     Beware of the load times. Wait for the load event.
 */
-@implementation WKTextView : CPWebView
+@implementation WKTextView : _WKWebView
 {
     id              delegate @accessors;
     CPTimer         loadTimer;
