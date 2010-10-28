@@ -9,16 +9,35 @@
 @import <AppKit/AppKit.j>
 @import <Foundation/CPTimer.j>
 
-WKTextCursorHeightFactor = 0.2;
-WKTextViewInnerPadding = 4;
-WKTextViewDefaultFont = "Verdana";
+@implementation _WKWebView : CPWebView
+
+- (DOMWindow)DOMWindow
+{
+    var contentWindow = nil;
+    try
+    {
+        contentWindow = [super DOMWindow];
+    }
+    catch (e)
+    {
+    //  Do nothing.  When the Web View is not added to the DOM, it booms.
+    //  Just ignore the boom because WKTextView checks multiple times.
+    }
+    return contentWindow;
+}
+
+@end
+
+WKTextCursorHeightFactor    = 0.2;
+WKTextViewInnerPadding      = 4;
+WKTextViewDefaultFont       = "Verdana";
 
 _CancelEvent = function(ev) {
     if (!ev)
         ev = window.event;
     if (ev && ev.stopPropagation)
         ev.stopPropagation();
-    else
+    else if (ev && ev.cancelBubble)
         ev.cancelBubble = true;
 }
 
@@ -35,7 +54,7 @@ _EditorEvents = [
 
     Beware of the load times. Wait for the load event.
 */
-@implementation WKTextView : CPWebView
+@implementation WKTextView : _WKWebView
 {
     id              delegate @accessors;
     CPTimer         loadTimer;
@@ -140,6 +159,15 @@ _EditorEvents = [
         _scrollDiv = maybeEditor.__scroll_div;
         [self setEditor:maybeEditor];
 
+        if (loadTimer)
+        {
+            [loadTimer invalidate];
+            loadTimer = nil;
+        }
+
+        if (_html != nil)
+            [self setHtmlValue:_html];
+
         if ([delegate respondsToSelector:@selector(textViewDidLoad:)])
             [delegate textViewDidLoad:self];
 
@@ -205,16 +233,6 @@ _EditorEvents = [
     [self _actualizeEnabledState];
 }
 
-- (void)setAutohidesScrollers:(BOOL)aFlag
-{
-    if (autohidesScrollers === aFlag)
-        return;
-
-    autohidesScrollers = aFlag;
-
-    [self _updateScrollbar];
-}
-
 - (void)_actualizeEnabledState
 {
     if (editor)
@@ -241,6 +259,16 @@ _EditorEvents = [
             }
         }*/
     }
+}
+
+- (void)setAutohidesScrollers:(BOOL)aFlag
+{
+    if (autohidesScrollers === aFlag)
+        return;
+
+    autohidesScrollers = aFlag;
+
+    [self _updateScrollbar];
 }
 
 /*!
@@ -559,9 +587,12 @@ _EditorEvents = [
 
 - (void)setHtmlValue:(CPString)html
 {
-    editor.setHtml(false, html, false, false);
-    _cursorPlaced = NO;
+    if ([self editor] != nil)
+        editor.setHtml(false, html, false, false);
+    else
+        _html = html;
 
+    _cursorPlaced = NO;
     [self _didChange];
 }
 
