@@ -8,12 +8,12 @@
 
 @implementation _WKWebView : CPWebView
 
-- (DOMWindow) DOMWindow
+- (DOMWindow)DOMWindow
 {
-    var contentWindow = nil;	
+    var contentWindow = nil;
     try
     {
-        contentWindow = [super DOMWindow];	
+        contentWindow = [super DOMWindow];
     }
     catch (e)
     {
@@ -25,13 +25,9 @@
 
 @end
 
-
-
-
-
-WKTextCursorHeightFactor = 0.2;
-WKTextViewInnerPadding = 4;
-WKTextViewDefaultFont = "Verdana";
+WKTextCursorHeightFactor    = 0.2;
+WKTextViewInnerPadding      = 4;
+WKTextViewDefaultFont       = "Verdana";
 
 _CancelEvent = function(ev) {
     if (!ev)
@@ -141,8 +137,8 @@ _EditorEvents = [
             loadTimer = nil;
          }
 
-	if (_html != nil);
-	[self editor].innerHTML = _html;
+        if (_html != nil)
+            [self editor].innerHTML = _html;
 
         if ([delegate respondsToSelector:@selector(textViewDidLoad:)])
         {
@@ -520,13 +516,12 @@ _EditorEvents = [
 }
 
 - (void)setHtmlValue:(CPString)html
-{	
-    if ([self editor] != nil) {
+{
+    if ([self editor] != nil)
         [self editor].innerHTML = html;
-    } else {	
+    else
         _html = html;
-    }
-    
+
     [self _didChange];
 }
 
