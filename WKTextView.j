@@ -346,7 +346,7 @@ _EditorEvents = [
     // editor.focus();
 
     suppressAutoFocus = YES;
-    //[self setFontNameForSelection:WKTextViewDefaultFont];
+    [self setFontNameForSelection:@"Arial"];
     suppressAutoFocus = NO;
 
     if (editor['WKTextView_Installed'] === undefined)
