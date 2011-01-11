@@ -14,6 +14,7 @@ Create and combine the `Resources/WKTextView/closure-editor.js` file using the W
 	git submodule init
 	git submodule update
 	cd auxiliary
+	# Edit build.sh to provide the correct path to closure.jar.
 	sh build.sh
 
 ## Usage
