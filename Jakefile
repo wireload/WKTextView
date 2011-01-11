@@ -17,8 +17,8 @@ var ENV = require("system").env,
 
 app ("wyzihatkit", function(task)
 {
-    task.setBuildIntermediatesPath(FILE.join("Build", "wyzihatkit.build", configuration));
-    task.setBuildPath(FILE.join("Build", configuration));
+    task.setBuildIntermediatesPath(FILE.join(ENV["CAPP_BUILD"], "WyzihatKit.build", configuration));
+    task.setBuildPath(FILE.join(ENV["CAPP_BUILD"], configuration));
 
     task.setProductName("WyzihatKit");
     task.setIdentifier("wyzihatkit");
@@ -62,19 +62,4 @@ task ("release", function()
     JAKE.subjake(["."], "build", ENV);
 });
 
-task ("run", ["debug"], function()
-{
-    OS.system(["open", FILE.join("Build", "Debug", "wyzihatkit", "index.html")]);
-});
-
-task ("run-release", ["release"], function()
-{
-    OS.system(["open", FILE.join("Build", "Release", "wyzihatkit", "index.html")]);
-});
-
-task ("deploy", ["release"], function()
-{
-    FILE.mkdirs(FILE.join("Build", "Deployment", "wyzihatkit"));
-    OS.system(["press", "-f", FILE.join("Build", "Release", "wyzihatkit"), FILE.join("Build", "Deployment", "wyzihatkit")]);
-    printResults("Deployment")
-});
+task ("install", ["debug", "release"])
