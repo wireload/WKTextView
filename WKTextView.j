@@ -593,7 +593,7 @@ _EditorEvents = [
     if (![self editor])
         return _html;
 
-    return [self editor].innerHTML;
+    return [self editor].getCleanContents();
 }
 
 - (void)setHtmlValue:(CPString)html
