@@ -443,7 +443,7 @@ _EditorEvents = [
 {
     if (!_verticalScroller)
         return;
-    
+
     var scrollTop = 0,
         height = 1,
         frameHeight = CGRectGetHeight([self bounds]),
