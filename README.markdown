@@ -1,6 +1,8 @@
 WyzihatKit
 ==========
 
+**NOTE: This version of WyzihatKit has been succeeded by a Google Closure Editor based version. See https://github.com/aljungberg/WyzihatKit for the latest.**
+
 A [Cappuccino](http://cappuccino.org/) control providing rich text editing through use of the [WysiHat](http://github.com/josh/wysihat/) editor.
 
 This is mostly a hack for use until a proper rich-text-capable `CPTextView` is introduced.
