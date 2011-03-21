@@ -43,7 +43,11 @@ WysihatKit is released under the Apache License 2.0. The sample incorporates Cre
 # Authors
 
 * Alexander Ljungberg, [WireLoad LLC](http://wireload.net)
-* xanados
-* Paul Baumgart
 * Evadne Wu
+* Klaas Pieter Annema
+* Paul Baumgart
+* xanados
+
+## Thanks to
+
 * Harry Vangberg
