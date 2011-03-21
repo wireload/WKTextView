@@ -1,7 +1,7 @@
 WyzihatKit
 ==========
 
-A [Cappuccino](http://cappuccino.org/) control providing rich text editing through use of the [Google Closure Library](http://code.google.com/closure/library/) editor. In the master branch the Wysihat editor is used, hence the framework name.
+A [Cappuccino](http://cappuccino.org/) control providing rich text editing through use of the [Google Closure Library](http://code.google.com/closure/library/) editor. In a previous version the Wysihat editor was used, hence the framework name.
 
 This is mostly a hack for use until a proper rich-text-capable `CPTextView` is introduced.
 
