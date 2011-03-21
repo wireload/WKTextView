@@ -585,7 +585,10 @@ _EditorEvents = [
 
 - (CPString)htmlValue
 {
-    return editor.getCleanContents();
+    if (![self editor])
+        return _html;
+
+    return [self editor].getCleanContents();
 }
 
 - (void)setHtmlValue:(CPString)html
