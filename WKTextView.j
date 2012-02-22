@@ -2,8 +2,7 @@
  * WKTextView.j
  * WKTextView
  *
- * Created by Alexander Ljungberg, WireLoad LLC.
- *
+ * Created by Alexander Ljungberg, WireLoad Inc.
  */
 
 @import <AppKit/AppKit.j>
@@ -32,22 +31,22 @@ WKTextCursorHeightFactor    = 0.2;
 WKTextViewInnerPadding      = 4;
 WKTextViewDefaultFont       = "Verdana";
 
-_CancelEvent = function(ev) {
+var _CancelEvent = function(ev) {
     if (!ev)
         ev = window.event;
     if (ev && ev.stopPropagation)
         ev.stopPropagation();
     else if (ev && ev.cancelBubble)
         ev.cancelBubble = true;
-}
+};
 
-_EditorEvents = [
-    'onmousedown',
-    'onmouseup',
-    'onkeypress',
-    'onkeydown',
-    'onkeyup'
-]
+var _EditorEvents = [
+        'onmousedown',
+        'onmouseup',
+        'onkeypress',
+        'onkeydown',
+        'onkeyup'
+    ];
 
 /*!
     A closure editor based rich text editor widget.
@@ -806,3 +805,6 @@ _EditorEvents = [
     editor.execCommand(editor.Command.FONT_COLOR, [aColor hexString]);
     [self _didPerformAction];
 }
+
+@end
+
