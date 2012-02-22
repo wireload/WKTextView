@@ -1,9 +1,20 @@
 WyzihatKit
 ==========
 
-A [Cappuccino](http://cappuccino.org/) control providing rich text editing through use of the [Google Closure Library](http://code.google.com/closure/library/) editor. In a previous version the Wysihat editor was used, hence the framework name.
+A [Cappuccino](http://cappuccino.org/) control providing rich text editing through use of the [Google Closure Library](http://code.google.com/closure/library/) editor. (In a previous version the Wysihat editor was used, hence the framework name.)
 
-This is mostly a hack for use until a proper rich-text-capable `CPTextView` is introduced.
+Until a proper `CPTextView` is written this will probably be one of the most full featured rich text editor for Cappuccino.
+
+## Features
+
+ * Bold, italics, underline, strike through.
+ * Left, right, center and justify alignment.
+ * Bulleted and numbered lists.
+ * Links.
+ * Images.
+ * Fonts.
+ * Outputs regular HTML.
+ * Vaguely resembles a proper CPTextView in its API.
 
 ## Installation
 
@@ -42,7 +53,7 @@ WysihatKit is released under the Apache License 2.0. The sample incorporates Cre
 
 # Authors
 
-* Alexander Ljungberg, [WireLoad LLC](http://wireload.net)
+* Alexander Ljungberg, [WireLoad Inc](http://wireload.net)
 * Evadne Wu
 * Klaas Pieter Annema
 * Paul Baumgart
