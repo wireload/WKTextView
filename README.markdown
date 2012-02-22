@@ -5,6 +5,8 @@ A [Cappuccino](http://cappuccino.org/) control providing rich text editing throu
 
 Until a proper `CPTextView` is written this will probably be one of the most full featured rich text editor for Cappuccino.
 
+You can view an online demo [here](http://wireload.net/open_source/wktextview-sample/index.html).
+
 ## Features
 
  * Bold, italics, underline, strike through.
