@@ -1,6 +1,6 @@
 /*
  * WKTextView.j
- * WyzihatKit
+ * WKTextView
  *
  * Created by Alexander Ljungberg, WireLoad LLC.
  *

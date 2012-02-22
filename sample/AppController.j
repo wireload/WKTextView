@@ -7,7 +7,7 @@
  */
 
 @import <Foundation/CPObject.j>
-@import <WyzihatKit/WKTextView.j>
+@import <WKTextView/WKTextView.j>
 
 var NewToolbarItemIdentifier = "NewToolbarItemIdentifier",
     BoldToolbarItemIdentifier = "BoldToolbarItemIdentifier",

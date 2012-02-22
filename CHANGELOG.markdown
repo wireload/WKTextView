@@ -1,4 +1,4 @@
-WyzihatKit Changelog
+WKTextView Changelog
 ====================
 
 # Version 0.5 (February 22nd, 2012)
@@ -22,7 +22,7 @@ WyzihatKit Changelog
 * Fixed: various Firefox crashes when trying to manipulate a hidden editor.
 * Fixed: with Firefox, clicking the editor did not make it the first responder.
 * Fixed: the checkLoad timer would keep firing when a text view was hidden, burning CPU needlessly. Now only fire the check once and only repeat it if the view is actually visible and hence has a chance of loading any time soon.
-* Fixed: `editor.html` had to be placed in the main Resources folder of an app including WyzihatKit. It is now properly loaded from the WyzihatKit Framework folder.
+* Fixed: `editor.html` had to be placed in the main Resources folder of an app including WKTextView. It is now properly loaded from the WKTextView Framework folder.
 * Fixed: "unknown variable CPTimer" error.
 * Fixed: failure if the user sets the editor alue immediately after intialising an off-screen view.
 * IE specific fixes.
@@ -30,7 +30,7 @@ WyzihatKit Changelog
 # Version 0.4 (May 1st, 2010)
 
 ## New Features
-* Upgraded WysiHat. This version ups the minimum requirements to IE 7, Firefox 3, Safari 4 or Chrome 4. WyzihatKit was updated to use WysiHat as a contentEditable div instead of an iframe.
+* Upgraded WysiHat. This version ups the minimum requirements to IE 7, Firefox 3, Safari 4 or Chrome 4. WKTextView was updated to use WysiHat as a contentEditable div instead of an iframe.
 * Implemented setEnabled/isEnabled. When disabled the editor does not display a text edit cursor; it does not listen to mouse events, etc.
 * Support for editor padding was removed since it too was a source of jumping bugs, although on a smaller scale. If you need padding just add it around the editor instead.
 * Jakefile to create debug and release builds (`jake debug` and `jake release`).

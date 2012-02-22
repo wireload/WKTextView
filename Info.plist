@@ -3,11 +3,11 @@
 <plist version="1.0">
 <dict>
 	<key>CPBundleIdentifier</key>
-	<string>net.wireload.WyzihatKit</string>
+	<string>net.wireload.WKTextView</string>
 	<key>CPBundleInfoDictionaryVersion</key>
 	<string>6.0</string>
 	<key>CPBundleName</key>
-	<string>WyzihatKit</string>
+	<string>WKTextView</string>
 	<key>CPBundlePackageType</key>
 	<string>FMWK</string>
 	<key>CPBundleVersion</key>

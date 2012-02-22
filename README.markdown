@@ -1,7 +1,7 @@
-WyzihatKit
+WKTextView
 ==========
 
-A [Cappuccino](http://cappuccino.org/) control providing rich text editing through use of the [Google Closure Library](http://code.google.com/closure/library/) editor. (In a previous version the Wysihat editor was used, hence the framework name.)
+A [Cappuccino](http://cappuccino.org/) control providing rich text editing through use of a browser driving content editable field. Under the hood, the [Google Closure Library](http://code.google.com/closure/library/) editor is used.
 
 Until a proper `CPTextView` is written this will probably be one of the most full featured rich text editor for Cappuccino.
 
@@ -18,9 +18,9 @@ Until a proper `CPTextView` is written this will probably be one of the most ful
 
 ## Installation
 
-Link the `WyzihatKit` folder into your `Frameworks` folder.
+Link the `WKTextView` folder into your `Frameworks` folder.
 
-Create and combine the `Resources/WKTextView/closure-editor.js` file using the WyzihatKit modified version of the Closure editor:
+Create and combine the `Resources/WKTextView/closure-editor.js` file using the WKTextView modified version of the Closure editor:
 
 	git submodule init
 	git submodule update
@@ -38,18 +38,14 @@ The view needs to load resources such as `editor.html` and `closure-editor.js`. 
 
 ## Sample
 
-A sample program is provided in the `sample` folder. You can [view it online](http://hosting.wireload.net/wysihat/) or compile it yourself. To compile, install `Frameworks` and `wysihat.js`:
+A sample program is provided in the `sample` folder. To compile and view, run the `samplify.sh` script, then open up `index-debug.html` in a browser:
 
-	cd sample
-	capp gen -f -l --force # Installs Cappuccino frameworks.
-	cd Frameworks
-	ln -s ../../ WyzihatKit
-
-Then open up `index-debug.html` in a browser.
+    sh samplify.sh
+    open sample.dist/index-debug.html
 
 # License
 
-WysihatKit is released under the Apache License 2.0. The sample incorporates Creative Commons icons from [FamFamFam](http://www.famfamfam.com/lab/icons/silk/).
+WKTextView is released under the Apache License 2.0. The sample incorporates Creative Commons icons from [FamFamFam](http://www.famfamfam.com/lab/icons/silk/).
 
 # Authors
 

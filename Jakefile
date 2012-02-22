@@ -1,6 +1,6 @@
 /*
  * Jakefile
- * WyzihatKit
+ * WKTextView
  *
  * Created by Alexander Ljungberg on April 14, 2010.
  * Copyright 2010, WireLoad, LLC All rights reserved.
@@ -20,12 +20,12 @@ app ("wyzihatkit", function(task)
     task.setBuildIntermediatesPath(FILE.join("Build", "wyzihatkit.build", configuration));
     task.setBuildPath(FILE.join("Build", configuration));
 
-    task.setProductName("WyzihatKit");
+    task.setProductName("WKTextView");
     task.setIdentifier("wyzihatkit");
     task.setVersion("1.0");
     task.setAuthor("Alexander Ljungberg");
     task.setEmail("aljungberg@wireload.net");
-    task.setSummary("WyzihatKit");
+    task.setSummary("WKTextView");
     task.setSources((new FileList("**/*.j")).exclude(FILE.join("Build", "**")).exclude(FILE.join("sample", "**")).exclude(FILE.join("sample.dist", "**")));
     task.setResources(new FileList("Resources/**"));
     task.setInfoPlistPath("Info.plist");
@@ -39,7 +39,7 @@ app ("wyzihatkit", function(task)
 function printResults(configuration)
 {
     print("----------------------------");
-    print(configuration+" app built at path: "+FILE.join("Build", configuration, "WyzihatKit"));
+    print(configuration+" app built at path: "+FILE.join("Build", configuration, "WKTextView"));
     print("----------------------------");
 }
 
