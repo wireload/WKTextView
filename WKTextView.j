@@ -28,7 +28,6 @@
 @end
 
 WKTextCursorHeightFactor    = 0.2;
-WKTextViewInnerPadding      = 4;
 WKTextViewDefaultFont       = "Verdana";
 
 var _CancelEvent = function(ev) {
@@ -278,8 +277,10 @@ var _EditorEvents = [
         return;
 
     var contentInset = [self currentValueForThemeAttribute:@"content-inset"];
-
     editor.__padder_div.style.padding = "" + (contentInset.top || 0) + "px " + (contentInset.right || 0) + "px " + (contentInset.bottom || 0) + "px " + (contentInset.left || 0) + "px";
+
+    // The new padding might require a different minimum height.
+    [self _resizeWebFrame];
 }
 
 - (void)layoutSubviews
@@ -576,8 +577,11 @@ var _EditorEvents = [
 - (void)_resizeWebFrame
 {
     if (editor && editor.getElement())
-//        editor.setMinHeight(CGRectGetHeight([self bounds]) - (2+WKTextViewInnerPadding*2));
-        editor.getElement().style.minHeight = (CGRectGetHeight([self bounds])-(2+WKTextViewInnerPadding*2)) + "px";
+    {
+        var contentInset = [self currentValueForThemeAttribute:@"content-inset"];
+        //editor.setMinHeight([self bounds].size.height - contentInset.top - contentInset.bottom);
+        editor.getElement().style.minHeight = (CGRectGetHeight([self bounds]) - contentInset.top - contentInset.bottom) + "px";
+    }
     [self _updateScrollbar];
 }
 
