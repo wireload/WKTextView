@@ -115,6 +115,7 @@ var _EditorEvents = [
         [_verticalScroller setAutoresizingMask:CPViewMinXMargin];
         [_verticalScroller setTarget:self];
         [_verticalScroller setAction:@selector(_verticalScrollerDidScroll:)];
+        [_verticalScroller setStyle:[CPScrollView globalScrollerStyle]];
 
         [self addSubview:_verticalScroller];
         [self _updateScrollbar];
@@ -500,7 +501,7 @@ var _EditorEvents = [
 
     [_verticalScroller setFloatValue:scrollTop / difference];
     [_verticalScroller setKnobProportion:proportion];
-    [_verticalScroller setFrame:CGRectMake(CGRectGetMaxX([self bounds])-scrollerWidth, 0, scrollerWidth, frameHeight)];
+    [_verticalScroller setFrame:CGRectMake(CGRectGetMaxX([self bounds]) - scrollerWidth, 0, scrollerWidth, frameHeight)];
 }
 
 - (void)_verticalScrollerDidScroll:(CPScroller)aScroller
