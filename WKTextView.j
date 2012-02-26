@@ -79,6 +79,17 @@ var _EditorEvents = [
     boolean         _isTryingToBecomeFirstResponder;
 }
 
++ (CPString)defaultThemeClass
+{
+    return "wktextview";
+}
+
++ (id)themeAttributes
+{
+    return [CPDictionary dictionaryWithObjects:[CGInsetMake(4.0, 4.0, 4.0, 4.0)]
+                                       forKeys:[@"content-inset"]];
+}
+
 - (id)initWithFrame:(CGRect)aFrame
 {
     if (self = [super initWithFrame:aFrame])
@@ -260,6 +271,23 @@ var _EditorEvents = [
     }
 }
 
+- (void)_actualizeTheme
+{
+    if (!editor || !editor.__padder_div)
+        return;
+
+    var contentInset = [self currentValueForThemeAttribute:@"content-inset"];
+
+    editor.__padder_div.style.padding = "" + (contentInset.top || 0) + "px " + (contentInset.right || 0) + "px " + (contentInset.bottom || 0) + "px " + (contentInset.left || 0) + "px";
+}
+
+- (void)layoutSubviews
+{
+    [super layoutSubviews];
+
+    [self _actualizeTheme];
+}
+
 - (void)setAutohidesScrollers:(BOOL)aFlag
 {
     if (autohidesScrollers === aFlag)
@@ -428,6 +456,7 @@ var _EditorEvents = [
         editor['WKTextView_Installed'] = true;
     }
 
+    [self _actualizeTheme];
     [self _actualizeEnabledState];
     [self _resizeWebFrame];
 }

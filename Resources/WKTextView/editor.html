@@ -57,6 +57,7 @@
   goog.editor.Field.DELAYED_CHANGE_FREQUENCY = 100;
 
   var closure_editor = new goog.editor.SeamlessField('textarea');
+  closure_editor.__padder_div = document.getElementById('padder');
   closure_editor.__scroll_div = document.getElementById('scrolldiv');
   closure_editor.Command = goog.editor.Command;
 
