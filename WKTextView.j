@@ -191,19 +191,24 @@ var _EditorEvents = [
 
 - (BOOL)acceptsFirstResponder
 {
-    return (editor !== nil && [self isEditable] && [self isEnabled]);
+    return [self isEditable] && [self isEnabled];
 }
 
 - (BOOL)becomeFirstResponder
 {
     [self _didBeginEditing];
-    if (_cursorPlaced)
-        editor.focus();
-    else
+    if (editor)
     {
-        editor.focusAndPlaceCursorAtStart();
-        _cursorPlaced = YES;
+        if (_cursorPlaced)
+            editor.focus();
+        else
+        {
+            editor.focusAndPlaceCursorAtStart();
+            _cursorPlaced = YES;
+        }
     }
+    // ...if !editor this method will be called again once the editor is ready.
+
     return YES;
 }
 
@@ -461,6 +466,9 @@ var _EditorEvents = [
     [self _actualizeTheme];
     [self _actualizeEnabledState];
     [self _resizeWebFrame];
+
+    if ([[self window] firstResponder] === self)
+        [self becomeFirstResponder];
 }
 
 - (JSObject)editor
